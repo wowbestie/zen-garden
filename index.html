@@ -409,12 +409,15 @@ function drawDayNightOverlay(){
   const labels=['🌑 MIDNIGHT','🌅 DAWN','☀️ NOON','🌇 DUSK','🌑 MIDNIGHT'];
   document.getElementById('time-label').textContent=labels[Math.min(Math.round(timeOfDay/25),4)];
 }
-function setTimeOfDay(v){timeOfDay=parseFloat(v);document.getElementById('time-slider').value=v;drawDayNightOverlay();}
+function setTimeOfDay(v){timeOfDay=parseFloat(v);document.getElementById('time-slider').value=v;drawDayNightOverlay();debouncedSave();}
 function toggleDayNight(){
   const btn=document.getElementById('day-btn');
   if(!isNightAuto){isNightAuto=true;btn.classList.add('active');btn.textContent='⏹ STOP';nightAutoTimer=setInterval(()=>{timeOfDay=(timeOfDay+0.04)%100;document.getElementById('time-slider').value=timeOfDay;drawDayNightOverlay();},60);}
   else{isNightAuto=false;btn.classList.remove('active');btn.textContent='🌙 CYCLE';clearInterval(nightAutoTimer);}
 }
+
+let saveTimer;
+function debouncedSave(){clearTimeout(saveTimer);saveTimer=setTimeout(autoSave,800);}
 
 function spawnSparkles(x,y,color,n){for(let i=0;i<n;i++)sparkles.push({x,y,vx:(Math.random()-.5)*4,vy:(Math.random()-.5)*4-1,life:1,color,size:2+Math.random()*3});}
 function sparkleLoop(){
@@ -426,17 +429,17 @@ function sparkleLoop(){
 function applyTool(c,r){
   if(c<0||r<0||c>=COLS||r>=ROWS)return;
   const cell=grid[r][c];
-  if(tool==='mow'){if(cell.type==='tall'){grid[r][c]={type:'mowed'};spawnSparkles(c*CELL+CELL/2,r*CELL+CELL/2,'#aaffaa',5);drawCell(c,r);}}
+  if(tool==='mow'){if(cell.type==='tall'){grid[r][c]={type:'mowed'};spawnSparkles(c*CELL+CELL/2,r*CELL+CELL/2,'#aaffaa',5);drawCell(c,r);debouncedSave();}}
   else if(tool==='pond'){placePond(c,r);}
-  else if(tool==='butterfly'){addButterfly(c*CELL+CELL/2,r*CELL+CELL/2);spawnSparkles(c*CELL+CELL/2,r*CELL+CELL/2,'#ffccff',8);}
-  else if(tool==='bird'){addBird(c*CELL+CELL/2,r*CELL+CELL/2);spawnSparkles(c*CELL+CELL/2,r*CELL+CELL/2,'#aaddff',8);}
+  else if(tool==='butterfly'){addButterfly(c*CELL+CELL/2,r*CELL+CELL/2);spawnSparkles(c*CELL+CELL/2,r*CELL+CELL/2,'#ffccff',8);debouncedSave();}
+  else if(tool==='bird'){addBird(c*CELL+CELL/2,r*CELL+CELL/2);spawnSparkles(c*CELL+CELL/2,r*CELL+CELL/2,'#aaddff',8);debouncedSave();}
   else if(['rose','daisy','tulip','sunflower','mushroom','stone'].includes(tool)){
     if(cell.type!=='tall'){
       grid[r][c]={type:'object',obj:tool};
       spawnSparkles(c*CELL+CELL/2,r*CELL+CELL/2,'#ffd700',8);
       drawCell(c,r);
-      // check for bee after placing a flower
       if(FLOWER_TYPES.includes(tool))checkBeeSpawn();
+      debouncedSave();
     }
   }
 }
@@ -455,8 +458,8 @@ garden.addEventListener('touchend',()=>painting=false);
 document.querySelectorAll('.tbtn[data-tool]').forEach(btn=>{
   btn.addEventListener('click',()=>{
     const t=btn.dataset.tool;
-    if(t==='regrow'){initGrid();drawAll();return;}
-    if(t==='clear'){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)grid[r][c]={type:'mowed'};butterflies=[];birds=[];bees=[];beeSpawned=false;drawAll();return;}
+    if(t==='regrow'){initGrid();drawAll();autoSave();return;}
+    if(t==='clear'){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)grid[r][c]={type:'mowed'};butterflies=[];birds=[];bees=[];beeSpawned=false;drawAll();autoSave();return;}
     tool=t;
     document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
@@ -481,8 +484,7 @@ function randomizeGarden(){
   for(let i=0;i<2+Math.floor(Math.random()*3);i++)addBird(Math.random()*W,20+Math.random()*(H*.3));
   drawAll();spawnSparkles(W/2,H/2,'#ffd700',30);
   document.getElementById('status').textContent='🎲 Garden randomized!';
-  // random gardens often have ≥15 flowers — check after a short delay for dramatic effect
-  setTimeout(()=>checkBeeSpawn(),800);
+  setTimeout(()=>{checkBeeSpawn();autoSave();},800);
 }
 function saveGarden(){
   try{
@@ -551,9 +553,54 @@ document.addEventListener('click',e=>{if(!document.getElementById('music-wrap').
 function dismissWelcome(){const w=document.getElementById('welcome');w.classList.add('hiding');setTimeout(()=>w.remove(),380);}
 setTimeout(()=>{const w=document.getElementById('welcome');if(w)dismissWelcome();},9000);
 
+// ── Persistence ────────────────────────────────────────────────────────────
+const SAVE_KEY='zen-garden-session';
+
+function autoSave(){
+  try{
+    const data={
+      grid:grid.map(row=>row.map(c=>({...c}))),
+      time:timeOfDay,
+      beeSpawned,
+      butterflyCount:butterflies.length,
+      birdCount:birds.length,
+    };
+    window.storage.set(SAVE_KEY,JSON.stringify(data));
+  }catch(e){}
+}
+
+async function tryRestoreSession(){
+  try{
+    const result=await window.storage.get(SAVE_KEY);
+    if(!result||!result.value)return false;
+    const data=JSON.parse(result.value);
+    if(!data.grid)return false;
+    grid=data.grid;
+    // patch any missing fields from old saves
+    for(let r=0;r<grid.length;r++)for(let c=0;c<grid[r].length;c++){
+      if(!grid[r][c])grid[r][c]={type:'mowed'};
+    }
+    recomputePondEdges();
+    if(data.time!=null){timeOfDay=data.time;document.getElementById('time-slider').value=timeOfDay;}
+    beeSpawned=!!data.beeSpawned;
+    butterflies=[];birds=[];bees=[];
+    const bc=data.butterflyCount||0,brd=data.birdCount||0;
+    for(let i=0;i<bc;i++)addButterfly(40+Math.random()*(W-80),40+Math.random()*(H-80));
+    for(let i=0;i<brd;i++)addBird(Math.random()*W,20+Math.random()*(H*.3));
+    if(beeSpawned)addBee(40+Math.random()*(W-80),30+Math.random()*(H*.4));
+    drawAll();drawDayNightOverlay();
+    document.getElementById('status').textContent='🌿 Welcome back to your garden!';
+    return true;
+  }catch(e){return false;}
+}
+
 // Boot
 calcDimensions();
-initGrid();drawAll();animLoop();sparkleLoop();windEffect();drawDayNightOverlay();
+initGrid();
+animLoop();sparkleLoop();windEffect();
+tryRestoreSession().then(restored=>{
+  if(!restored){drawAll();drawDayNightOverlay();}
+});
 </script>
 </body>
 </html>
