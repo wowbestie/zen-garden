@@ -417,7 +417,9 @@ function toggleDayNight(){
 }
 
 let saveTimer;
-function debouncedSave(){clearTimeout(saveTimer);saveTimer=setTimeout(autoSave,800);}
+function debouncedSave(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>autoSave(),600);}
+// also save immediately on any interaction so rapid refresh doesn't lose state
+function saveNow(){clearTimeout(saveTimer);autoSave();}
 
 function spawnSparkles(x,y,color,n){for(let i=0;i<n;i++)sparkles.push({x,y,vx:(Math.random()-.5)*4,vy:(Math.random()-.5)*4-1,life:1,color,size:2+Math.random()*3});}
 function sparkleLoop(){
@@ -431,8 +433,8 @@ function applyTool(c,r){
   const cell=grid[r][c];
   if(tool==='mow'){if(cell.type==='tall'){grid[r][c]={type:'mowed'};spawnSparkles(c*CELL+CELL/2,r*CELL+CELL/2,'#aaffaa',5);drawCell(c,r);debouncedSave();}}
   else if(tool==='pond'){placePond(c,r);}
-  else if(tool==='butterfly'){addButterfly(c*CELL+CELL/2,r*CELL+CELL/2);spawnSparkles(c*CELL+CELL/2,r*CELL+CELL/2,'#ffccff',8);debouncedSave();}
-  else if(tool==='bird'){addBird(c*CELL+CELL/2,r*CELL+CELL/2);spawnSparkles(c*CELL+CELL/2,r*CELL+CELL/2,'#aaddff',8);debouncedSave();}
+  else if(tool==='butterfly'){addButterfly(c*CELL+CELL/2,r*CELL+CELL/2);spawnSparkles(c*CELL+CELL/2,r*CELL+CELL/2,'#ffccff',8);saveNow();}
+  else if(tool==='bird'){addBird(c*CELL+CELL/2,r*CELL+CELL/2);spawnSparkles(c*CELL+CELL/2,r*CELL+CELL/2,'#aaddff',8);saveNow();}
   else if(['rose','daisy','tulip','sunflower','mushroom','stone'].includes(tool)){
     if(cell.type!=='tall'){
       grid[r][c]={type:'object',obj:tool};
@@ -458,8 +460,8 @@ garden.addEventListener('touchend',()=>painting=false);
 document.querySelectorAll('.tbtn[data-tool]').forEach(btn=>{
   btn.addEventListener('click',()=>{
     const t=btn.dataset.tool;
-    if(t==='regrow'){initGrid();drawAll();autoSave();return;}
-    if(t==='clear'){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)grid[r][c]={type:'mowed'};butterflies=[];birds=[];bees=[];beeSpawned=false;drawAll();autoSave();return;}
+    if(t==='regrow'){initGrid();drawAll();saveNow();return;}
+    if(t==='clear'){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)grid[r][c]={type:'mowed'};butterflies=[];birds=[];bees=[];beeSpawned=false;drawAll();saveNow();return;}
     tool=t;
     document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
@@ -484,7 +486,7 @@ function randomizeGarden(){
   for(let i=0;i<2+Math.floor(Math.random()*3);i++)addBird(Math.random()*W,20+Math.random()*(H*.3));
   drawAll();spawnSparkles(W/2,H/2,'#ffd700',30);
   document.getElementById('status').textContent='🎲 Garden randomized!';
-  setTimeout(()=>{checkBeeSpawn();autoSave();},800);
+  setTimeout(()=>{checkBeeSpawn();saveNow();},800);
 }
 function saveGarden(){
   try{
@@ -556,7 +558,7 @@ setTimeout(()=>{const w=document.getElementById('welcome');if(w)dismissWelcome()
 // ── Persistence ────────────────────────────────────────────────────────────
 const SAVE_KEY='zen-garden-session';
 
-function autoSave(){
+async function autoSave(){
   try{
     const data={
       grid:grid.map(row=>row.map(c=>({...c}))),
@@ -565,9 +567,12 @@ function autoSave(){
       butterflyCount:butterflies.length,
       birdCount:birds.length,
     };
-    window.storage.set(SAVE_KEY,JSON.stringify(data));
-  }catch(e){}
+    await window.storage.set(SAVE_KEY,JSON.stringify(data));
+  }catch(e){console.warn('zen-garden save failed:',e);}
 }
+
+// force a synchronous-style save right before the tab unloads
+window.addEventListener('beforeunload',()=>{ autoSave(); });
 
 async function tryRestoreSession(){
   try{
