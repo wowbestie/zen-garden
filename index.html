@@ -7,19 +7,19 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:#1a0a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Press Start 2P',monospace;overflow:hidden;padding:12px 0;}
+body{background:#1a0a2e;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:100vh;font-family:'Press Start 2P',monospace;overflow-x:hidden;overflow-y:auto;padding:10px 6px 16px;}
 
 /* TOP BAR */
-#top-bar{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;justify-content:center;}
-h1{color:#f7e26b;font-size:12px;text-shadow:2px 2px #c8502a,0 0 20px #f7e26b88;letter-spacing:2px;}
-.hdr-btn{background:#3d2b6e;border:3px solid #f7e26b;color:#f7e26b;font-family:'Press Start 2P',monospace;font-size:7px;padding:5px 8px;cursor:pointer;box-shadow:3px 3px 0 #000;transition:background .1s;white-space:nowrap;}
+#top-bar{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;justify-content:center;}
+h1{color:#f7e26b;font-size:clamp(8px,2.5vw,12px);text-shadow:2px 2px #c8502a,0 0 20px #f7e26b88;letter-spacing:2px;margin-bottom:8px;}
+.hdr-btn{background:#3d2b6e;border:3px solid #f7e26b;color:#f7e26b;font-family:'Press Start 2P',monospace;font-size:clamp(5px,1.5vw,7px);padding:5px 8px;cursor:pointer;box-shadow:3px 3px 0 #000;transition:background .1s;white-space:nowrap;}
 .hdr-btn:hover{background:#5a3fa0;}
 .hdr-btn.active{background:#f7e26b;color:#1a0a2e;box-shadow:inset 2px 2px 0 #00000055;}
 
 /* MUSIC DROPDOWN */
 #music-wrap{position:relative;}
 #music-row{display:flex;flex-direction:row;}
-#music-btn{background:#3d2b6e;border:3px solid #f7e26b;border-right:none;color:#f7e26b;font-family:'Press Start 2P',monospace;font-size:7px;padding:5px 8px;cursor:pointer;box-shadow:3px 3px 0 #000;white-space:nowrap;}
+#music-btn{background:#3d2b6e;border:3px solid #f7e26b;border-right:none;color:#f7e26b;font-family:'Press Start 2P',monospace;font-size:clamp(5px,1.5vw,7px);padding:5px 8px;cursor:pointer;box-shadow:3px 3px 0 #000;white-space:nowrap;}
 #music-btn.active{background:#f7e26b;color:#1a0a2e;}
 #track-arrow{background:#3d2b6e;border:3px solid #f7e26b;color:#f7e26b;font-family:'Press Start 2P',monospace;font-size:7px;padding:5px 7px;cursor:pointer;box-shadow:3px 3px 0 #000;}
 #track-arrow:hover,#music-btn:hover{background:#5a3fa0;}
@@ -31,42 +31,59 @@ h1{color:#f7e26b;font-size:12px;text-shadow:2px 2px #c8502a,0 0 20px #f7e26b88;l
 .track-opt.selected{background:#f7e26b;color:#1a0a2e;}
 
 /* TIME BAR */
-#time-bar{display:flex;align-items:center;gap:8px;margin-bottom:18px;}
-#time-label{color:#f7e26b;font-size:6px;min-width:90px;}
-#time-slider{-webkit-appearance:none;width:140px;height:8px;background:#3d2b6e;border:2px solid #f7e26b;outline:none;cursor:pointer;}
+#time-bar{display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap;justify-content:center;}
+#time-label{color:#f7e26b;font-size:clamp(5px,1.5vw,6px);min-width:80px;text-align:center;}
+#time-slider{-webkit-appearance:none;width:clamp(100px,30vw,140px);height:8px;background:#3d2b6e;border:2px solid #f7e26b;outline:none;cursor:pointer;}
 #time-slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:#f7e26b;border:2px solid #000;cursor:pointer;}
+#time-hint{color:#f7e26b;font-size:clamp(4px,1.2vw,6px);white-space:nowrap;}
 
 /* CANVAS */
-#canvas-wrap{position:relative;border:5px solid #f7e26b;box-shadow:0 0 30px #f7e26b44,6px 6px 0 #000;cursor:crosshair;}
+#canvas-wrap{position:relative;border:4px solid #f7e26b;box-shadow:0 0 24px #f7e26b44,5px 5px 0 #000;cursor:crosshair;touch-action:none;flex-shrink:0;}
 canvas{display:block;image-rendering:pixelated;}
 #overlay-canvas,#sparkle-canvas,#anim-canvas{position:absolute;top:0;left:0;pointer-events:none;}
 
-/* TOOLBARS — totally isolated styles */
-#tb-wrap{margin-top:12px;display:flex;flex-direction:column;align-items:center;gap:8px;}
-
-#tb-main{display:flex;flex-direction:row;border:3px solid #f7e26b;box-shadow:0 4px 0 #000;background:#1a0a2e;}
-#tb-actions{display:flex;flex-direction:row;border:3px solid #f7e26b;box-shadow:0 4px 0 #000;background:#1a0a2e;}
+/* TOOLBARS */
+#tb-wrap{margin-top:10px;display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;max-width:720px;}
+#tb-main,#tb-actions{display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;border:3px solid #f7e26b;box-shadow:0 4px 0 #000;background:#1a0a2e;width:100%;}
 
 .tbtn{
   display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:4px;padding:8px 10px;min-width:50px;
+  gap:3px;padding:clamp(5px,1.5vw,8px) clamp(6px,2vw,10px);
+  flex:1 1 auto;min-width:clamp(36px,9vw,52px);max-width:70px;
   background:#1a0a2e;color:#f7e26b;
-  border:none;border-right:2px solid #3d2b6e;
-  font-family:'Press Start 2P',monospace;font-size:5px;
+  border:none;border-right:2px solid #3d2b6e;border-bottom:2px solid #3d2b6e;
+  font-family:'Press Start 2P',monospace;
   cursor:pointer;white-space:nowrap;
 }
 .tbtn:last-child{border-right:none;}
 .tbtn:hover{background:#2d1d50;}
 .tbtn.active{background:#f7e26b;color:#1a0a2e;}
-.tbtn-ico{font-size:15px;line-height:1;}
-.tbtn-lbl{font-size:5px;}
+.tbtn-ico{font-size:clamp(12px,3.5vw,16px);line-height:1;}
+.tbtn-lbl{font-size:clamp(4px,1.1vw,5px);}
 
-#status{color:#aaffaa;font-size:6px;text-shadow:1px 1px #000;margin-top:6px;}
+#status{color:#aaffaa;font-size:clamp(4px,1.3vw,6px);text-shadow:1px 1px #000;margin-top:6px;text-align:center;padding:0 8px;}
+
+/* WELCOME TOAST */
+#welcome{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  background:#1a0a2e;border:3px solid #f7e26b;
+  box-shadow:4px 4px 0 #000,0 0 24px #f7e26b44;
+  padding:14px 18px;max-width:min(340px,90vw);
+  text-align:center;z-index:200;
+  animation:slideUp .4s ease;
+}
+@keyframes slideUp{from{opacity:0;transform:translate(-50%,-40%);}to{opacity:1;transform:translate(-50%,-50%);}}
+#welcome.hiding{animation:slideDown .35s ease forwards;}
+@keyframes slideDown{to{opacity:0;transform:translate(-50%,-60%);}}
+#welcome p{color:#f7e26b;font-family:'Press Start 2P',monospace;font-size:clamp(5.5px,1.4vw,7px);line-height:1.9;margin-bottom:10px;}
+#welcome p span{color:#aaffaa;}
+#welcome-close{background:#f7e26b;color:#1a0a2e;border:none;font-family:'Press Start 2P',monospace;font-size:clamp(5px,1.3vw,6px);padding:6px 12px;cursor:pointer;box-shadow:2px 2px 0 #000;}
+#welcome-close:hover{background:#ffe44d;}
 </style>
 </head>
 <body>
 
-<h1 style="margin-bottom:10px;">🪴 ZEN GARDEN 🪴</h1>
+<h1>🪴 ZEN GARDEN 🪴</h1>
 <div id="top-bar">
   <div id="music-wrap">
     <div id="music-row">
@@ -84,7 +101,7 @@ canvas{display:block;image-rendering:pixelated;}
 <div id="time-bar">
   <span id="time-label">☀️ NOON</span>
   <input type="range" id="time-slider" min="0" max="100" value="30" oninput="setTimeOfDay(this.value)">
-  <span style="color:#f7e26b;font-size:6px;">◀ DAWN · DUSK ▶</span>
+  <span id="time-hint">◀ DAWN · DUSK ▶</span>
 </div>
 
 <div id="canvas-wrap">
@@ -95,7 +112,6 @@ canvas{display:block;image-rendering:pixelated;}
 </div>
 
 <div id="tb-wrap">
-  
   <div id="tb-main">
     <button class="tbtn active" data-tool="mow"><span class="tbtn-ico">🌿</span><span class="tbtn-lbl">MOW</span></button>
     <button class="tbtn" data-tool="rose"><span class="tbtn-ico">🌹</span><span class="tbtn-lbl">ROSE</span></button>
@@ -116,10 +132,17 @@ canvas{display:block;image-rendering:pixelated;}
     <button class="tbtn" onclick="loadGarden()"><span class="tbtn-ico">📂</span><span class="tbtn-lbl">LOAD</span></button>
   </div>
 </div>
-<div id="status">Click and drag to mow • Place flowers, pond, butterflies & birds</div>
+<div id="status">Tap and drag to mow • Place flowers, pond, butterflies & birds</div>
+
+<div id="welcome">
+  <p>🪴 welcome to<br><span>zen garden</span> 🪴</p>
+  <p>click &amp; drag to <span>mow</span> the grass,<br>or hit <span>🎲 random</span> to<br>explore a garden instantly.</p>
+  <button id="welcome-close" onclick="dismissWelcome()">let's grow ✿</button>
+</div>
 
 <script>
-const COLS=40,ROWS=26,CELL=18;
+// ── Responsive dimensions ────────────────────────────────────────────────────
+let COLS,ROWS,CELL,W,H;
 const garden=document.getElementById('garden');
 const gctx=garden.getContext('2d');
 const oc=document.getElementById('overlay-canvas');
@@ -128,12 +151,26 @@ const ac=document.getElementById('anim-canvas');
 const actx=ac.getContext('2d');
 const sc=document.getElementById('sparkle-canvas');
 const sctx=sc.getContext('2d');
-const W=COLS*CELL,H=ROWS*CELL;
-[garden,oc,ac,sc].forEach(c=>{c.width=W;c.height=H;});
 
+function calcDimensions(){
+  const availW=Math.min(window.innerWidth-14,820);
+  CELL=Math.max(10,Math.min(20,Math.floor(availW/40)));
+  COLS=Math.floor(availW/CELL);
+  ROWS=Math.round(COLS*26/40);
+  W=COLS*CELL;H=ROWS*CELL;
+  [garden,oc,ac,sc].forEach(c=>{c.width=W;c.height=H;});
+  document.getElementById('canvas-wrap').style.width=W+'px';
+  document.getElementById('canvas-wrap').style.height=H+'px';
+  // regenerate stars
+  stars=[];
+  for(let i=0;i<80;i++)stars.push({x:Math.random()*W,y:Math.random()*H*.6,r:Math.random()>.7?2:1,twinkle:Math.random()*Math.PI*2});
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
 let grid=[],sparkles=[],tool='mow',painting=false;
 let timeOfDay=30,isNightAuto=false,nightAutoTimer=null;
 let butterflies=[],birds=[];
+let stars=[];
 const TALL_COLORS=['#2d7a2d','#3a9a3a','#256825','#1e5c1e','#48b848'];
 
 function initGrid(){
@@ -257,8 +294,6 @@ function animLoop(){
   requestAnimationFrame(animLoop);
 }
 
-let stars=[];
-for(let i=0;i<80;i++)stars.push({x:Math.random()*W,y:Math.random()*H*.6,r:Math.random()>.7?2:1,twinkle:Math.random()*Math.PI*2});
 let starT=0;
 function drawDayNightOverlay(){
   const angle=timeOfDay/100*Math.PI*2,brightness=Math.sin(angle);
@@ -306,7 +341,10 @@ function applyTool(c,r){
     if(cell.type!=='tall'){grid[r][c]={type:'object',obj:tool};spawnSparkles(c*CELL+CELL/2,r*CELL+CELL/2,'#ffd700',8);drawCell(c,r);}
   }
 }
-function getCell(e){const rect=garden.getBoundingClientRect(),sx=W/rect.width,sy=H/rect.height;return[Math.floor((e.clientX-rect.left)*sx/CELL),Math.floor((e.clientY-rect.top)*sy/CELL)];}
+function getCell(e){
+  const rect=garden.getBoundingClientRect();
+  return[Math.floor((e.clientX-rect.left)/CELL),Math.floor((e.clientY-rect.top)/CELL)];
+}
 garden.addEventListener('mousedown',e=>{painting=true;applyTool(...getCell(e));});
 garden.addEventListener('mousemove',e=>{if(!painting)return;applyTool(...getCell(e));});
 garden.addEventListener('mouseup',()=>painting=false);
@@ -323,7 +361,7 @@ document.querySelectorAll('.tbtn[data-tool]').forEach(btn=>{
     tool=t;
     document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
-    const tips={mow:'Drag to mow grass',pond:'Paint pond tiles — adjacent ones merge 🌊',butterfly:'Click to release a butterfly 🦋',bird:'Click to send a bird soaring 🐦',rose:'Click mowed ground 🌹',daisy:'Click mowed ground 🌼',tulip:'Click mowed ground 🌷',sunflower:'Click mowed ground 🌻',mushroom:'Click mowed ground 🍄',stone:'Click mowed ground 🪨'};
+    const tips={mow:'Drag to mow grass',pond:'Paint pond tiles — adjacent ones merge 🌊',butterfly:'Tap to release a butterfly 🦋',bird:'Tap to send a bird soaring 🐦',rose:'Tap mowed ground 🌹',daisy:'Tap mowed ground 🌼',tulip:'Tap mowed ground 🌷',sunflower:'Tap mowed ground 🌻',mushroom:'Tap mowed ground 🍄',stone:'Tap mowed ground 🪨'};
     document.getElementById('status').textContent=tips[t]||'';
   });
 });
@@ -347,7 +385,7 @@ function randomizeGarden(){
 }
 function saveGarden(){
   try{
-    const data={grid:grid.map(row=>row.map(c=>({...c}))),time:timeOfDay};
+    const data={grid:grid.map(row=>row.map(c=>({...c}))),time:timeOfDay,cols:COLS,rows:ROWS};
     const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='zen-garden.json';a.click();URL.revokeObjectURL(a.href);
     document.getElementById('status').textContent='💾 Garden saved!';spawnSparkles(W/2,H/2,'#aaffaa',20);
@@ -369,7 +407,19 @@ function loadGarden(){
   };input.click();
 }
 
-// MUSIC
+// ── Resize handler ────────────────────────────────────────────────────────────
+let resizeTimer;
+window.addEventListener('resize',()=>{
+  clearTimeout(resizeTimer);
+  resizeTimer=setTimeout(()=>{
+    calcDimensions();
+    initGrid();
+    drawAll();
+    drawDayNightOverlay();
+  },250);
+});
+
+// ── Music ─────────────────────────────────────────────────────────────────────
 let audioCtx=null,musicPlaying=false,schedulerTimer=null,nextNoteTime=0;
 let melIdx=0,bassIdx=0,arpIdx=0,drumIdx=0,currentSection=0,currentTrack=0;
 let melSteps=[],bassSteps=[],arpSteps=[];
@@ -402,6 +452,16 @@ function selectTrack(v){
 }
 document.addEventListener('click',e=>{if(!document.getElementById('music-wrap').contains(e.target))document.getElementById('track-dropdown').classList.remove('open');});
 
+function dismissWelcome(){
+  const w=document.getElementById('welcome');
+  w.classList.add('hiding');
+  setTimeout(()=>w.remove(),380);
+}
+// Auto-dismiss after 9s
+setTimeout(()=>{const w=document.getElementById('welcome');if(w)dismissWelcome();},9000);
+
+// Boot
+calcDimensions();
 initGrid();drawAll();animLoop();sparkleLoop();windEffect();drawDayNightOverlay();
 </script>
 </body>
