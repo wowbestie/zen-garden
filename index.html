@@ -8,15 +8,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:#1a0a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Press Start 2P',monospace;overflow-x:hidden;overflow-y:auto;padding:10px 6px 16px;}
-
-/* TOP BAR */
 #top-bar{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;justify-content:center;}
 h1{color:#f7e26b;font-size:clamp(8px,2.5vw,12px);text-shadow:2px 2px #c8502a,0 0 20px #f7e26b88;letter-spacing:2px;margin-bottom:18px;}
 .hdr-btn{background:#3d2b6e;border:3px solid #f7e26b;color:#f7e26b;font-family:'Press Start 2P',monospace;font-size:clamp(5px,1.5vw,7px);padding:5px 8px;cursor:pointer;box-shadow:3px 3px 0 #000;transition:background .1s;white-space:nowrap;}
 .hdr-btn:hover{background:#5a3fa0;}
 .hdr-btn.active{background:#f7e26b;color:#1a0a2e;box-shadow:inset 2px 2px 0 #00000055;}
-
-/* MUSIC DROPDOWN */
 #music-wrap{position:relative;}
 #music-row{display:flex;flex-direction:row;}
 #music-btn{background:#3d2b6e;border:3px solid #f7e26b;border-right:none;color:#f7e26b;font-family:'Press Start 2P',monospace;font-size:clamp(5px,1.5vw,7px);padding:5px 8px;cursor:pointer;box-shadow:3px 3px 0 #000;white-space:nowrap;}
@@ -29,50 +25,28 @@ h1{color:#f7e26b;font-size:clamp(8px,2.5vw,12px);text-shadow:2px 2px #c8502a,0 0
 .track-opt:last-child{border-bottom:none;}
 .track-opt:hover{background:#3d2b6e;}
 .track-opt.selected{background:#f7e26b;color:#1a0a2e;}
-
-/* TIME BAR */
 #time-bar{display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap;justify-content:center;}
 #time-label{color:#f7e26b;font-size:clamp(5px,1.5vw,6px);min-width:80px;text-align:center;}
 #time-slider{-webkit-appearance:none;width:clamp(100px,30vw,140px);height:8px;background:#3d2b6e;border:2px solid #f7e26b;outline:none;cursor:pointer;}
 #time-slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:#f7e26b;border:2px solid #000;cursor:pointer;}
-#time-hint{color:#f7e26b;font-size:clamp(4px,1.2vw,6px);white-space:nowrap;}
-
-/* CANVAS */
 #canvas-wrap{position:relative;border:4px solid #f7e26b;box-shadow:0 0 24px #f7e26b44,5px 5px 0 #000;cursor:crosshair;touch-action:none;flex-shrink:0;}
 canvas{display:block;image-rendering:pixelated;}
 #overlay-canvas,#sparkle-canvas,#anim-canvas{position:absolute;top:0;left:0;pointer-events:none;}
-
-/* TOOLBARS */
 #tb-wrap{margin-top:10px;display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;max-width:720px;}
 #tb-main,#tb-actions{display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;border:3px solid #f7e26b;box-shadow:0 4px 0 #000;background:#1a0a2e;width:100%;}
 #tb-actions{margin-top:10px;}
-
-.tbtn{
-  display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:3px;padding:clamp(5px,1.5vw,8px) clamp(6px,2vw,10px);
-  flex:1 1 20%;max-width:20%;
-  background:#1a0a2e;color:#f7e26b;
-  border:none;border-right:2px solid #3d2b6e;border-bottom:2px solid #3d2b6e;
-  font-family:'Press Start 2P',monospace;
-  cursor:pointer;white-space:nowrap;
-}
+.tbtn{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:clamp(5px,1.5vw,8px) clamp(6px,2vw,10px);flex:1 1 20%;max-width:20%;background:#1a0a2e;color:#f7e26b;border:none;border-right:2px solid #3d2b6e;border-bottom:2px solid #3d2b6e;font-family:'Press Start 2P',monospace;cursor:pointer;white-space:nowrap;}
 .tbtn:last-child{border-right:none;}
 .tbtn:hover{background:#2d1d50;}
 .tbtn.active{background:#f7e26b;color:#1a0a2e;}
 .tbtn-ico{font-size:clamp(12px,3.5vw,16px);line-height:1;}
 .tbtn-lbl{font-size:clamp(4px,1.1vw,5px);}
-
 #status{color:#aaffaa;font-size:clamp(4px,1.3vw,6px);text-shadow:1px 1px #000;margin-top:6px;text-align:center;padding:0 8px;}
-
-/* WELCOME TOAST */
-#welcome{
-  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-  background:#1a0a2e;border:3px solid #f7e26b;
-  box-shadow:4px 4px 0 #000,0 0 24px #f7e26b44;
-  padding:14px 18px;max-width:min(340px,90vw);
-  text-align:center;z-index:200;
-  animation:slideUp .4s ease;
-}
+/* bee toast */
+#bee-toast{display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a0a2e;border:3px solid #f7c842;box-shadow:3px 3px 0 #000,0 0 16px #f7c84244;padding:10px 16px;z-index:300;text-align:center;animation:beeSlide .5s ease;}
+@keyframes beeSlide{from{opacity:0;transform:translateX(-50%) translateY(20px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+#bee-toast p{color:#f7c842;font-family:'Press Start 2P',monospace;font-size:clamp(5px,1.3vw,7px);line-height:1.8;}
+#welcome{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1a0a2e;border:3px solid #f7e26b;box-shadow:4px 4px 0 #000,0 0 24px #f7e26b44;padding:14px 18px;max-width:min(340px,90vw);text-align:center;z-index:200;animation:slideUp .4s ease;}
 @keyframes slideUp{from{opacity:0;transform:translate(-50%,-40%);}to{opacity:1;transform:translate(-50%,-50%);}}
 #welcome.hiding{animation:slideDown .35s ease forwards;}
 @keyframes slideDown{to{opacity:0;transform:translate(-50%,-60%);}}
@@ -102,7 +76,6 @@ canvas{display:block;image-rendering:pixelated;}
 <div id="time-bar">
   <span id="time-label">☀️ NOON</span>
   <input type="range" id="time-slider" min="0" max="100" value="30" oninput="setTimeOfDay(this.value)">
-
 </div>
 
 <div id="canvas-wrap">
@@ -113,7 +86,7 @@ canvas{display:block;image-rendering:pixelated;}
 </div>
 
 <div id="tb-wrap">
-  <div id="status">Click and drag to mow • Place flowers, pond, butterflies & birds</div>
+  <div id="status">Click and drag to mow • Place flowers, pond, butterflies &amp; birds</div>
   <div id="tb-main">
     <button class="tbtn active" data-tool="mow"><span class="tbtn-ico">🌿</span><span class="tbtn-lbl">MOW</span></button>
     <button class="tbtn" data-tool="rose"><span class="tbtn-ico">🌹</span><span class="tbtn-lbl">ROSE</span></button>
@@ -135,6 +108,8 @@ canvas{display:block;image-rendering:pixelated;}
   </div>
 </div>
 
+<div id="bee-toast"><p>🐝 a wild bee appeared!<br>drawn by your flowers ✿</p></div>
+
 <div id="welcome">
   <p>🪴 welcome to<br><span>zen garden</span> 🪴</p>
   <p>click &amp; drag to <span>mow</span> the grass,<br>or hit <span>🎲 random</span> to<br>explore a garden instantly.</p>
@@ -142,7 +117,7 @@ canvas{display:block;image-rendering:pixelated;}
 </div>
 
 <script>
-// ── Responsive dimensions ────────────────────────────────────────────────────
+// ── Responsive dimensions ──────────────────────────────────────────────────
 let COLS,ROWS,CELL,W,H;
 const garden=document.getElementById('garden');
 const gctx=garden.getContext('2d');
@@ -162,22 +137,62 @@ function calcDimensions(){
   [garden,oc,ac,sc].forEach(c=>{c.width=W;c.height=H;});
   document.getElementById('canvas-wrap').style.width=W+'px';
   document.getElementById('canvas-wrap').style.height=H+'px';
-  // regenerate stars
   stars=[];
   for(let i=0;i<80;i++)stars.push({x:Math.random()*W,y:Math.random()*H*.6,r:Math.random()>.7?2:1,twinkle:Math.random()*Math.PI*2});
 }
 
-// ── State ─────────────────────────────────────────────────────────────────────
+// ── State ──────────────────────────────────────────────────────────────────
 let grid=[],sparkles=[],tool='mow',painting=false;
 let timeOfDay=30,isNightAuto=false,nightAutoTimer=null;
-let butterflies=[],birds=[];
+let butterflies=[],birds=[],bees=[];
 let stars=[];
+let beeSpawned=false; // tracks if bee has ever been spawned this session
+const FLOWER_TYPES=['rose','daisy','tulip','sunflower'];
+const BEE_THRESHOLD=15;
 const TALL_COLORS=['#2d7a2d','#3a9a3a','#256825','#1e5c1e','#48b848'];
+
+function countFlowers(){
+  let n=0;
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)
+    if(grid[r][c].type==='object'&&FLOWER_TYPES.includes(grid[r][c].obj))n++;
+  return n;
+}
+
+function checkBeeSpawn(){
+  if(beeSpawned||bees.length>0)return;
+  if(countFlowers()>=BEE_THRESHOLD){
+    beeSpawned=true;
+    // enter from a random edge
+    const ex=Math.random()<.5?-20:W+20,ey=20+Math.random()*H*.4;
+    addBee(ex,ey);
+    showBeeToast();
+    spawnSparkles(W/2,H*.3,'#f7c842',25);
+  }
+}
+
+function showBeeToast(){
+  const t=document.getElementById('bee-toast');
+  t.style.display='block';
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>{t.style.display='none';},4200);
+}
+
+function addBee(x,y){
+  bees.push({
+    x,y,tx:x+50,ty:y+50,
+    vx:0,vy:0,
+    wingPhase:Math.random()*Math.PI*2,
+    wingSpeed:0.28+Math.random()*0.08,
+    bobPhase:Math.random()*Math.PI*2,
+    wanderTimer:0,
+    wanderMax:90+Math.floor(Math.random()*70),
+  });
+}
 
 function initGrid(){
   grid=[];
   for(let r=0;r<ROWS;r++){grid[r]=[];for(let c=0;c<COLS;c++)grid[r][c]={type:'tall',variant:Math.floor(Math.random()*5)};}
-  butterflies=[];birds=[];
+  butterflies=[];birds=[];bees=[];beeSpawned=false;
 }
 function isPond(r,c){return r>=0&&r<ROWS&&c>=0&&c<COLS&&grid[r]&&grid[r][c]&&grid[r][c].type==='pond';}
 function recomputePondEdges(){
@@ -249,10 +264,20 @@ function addBird(x,y){
   birds.push({x,y,vx:(Math.random()>.5?1:-1)*(1.2+Math.random()*.8),vy:-(0.2+Math.random()*.3),wingPhase:Math.random()*Math.PI*2,wingSpeed:0.18+Math.random()*.07,size:5+Math.random()*3,soarTimer:0,soarMax:60+Math.floor(Math.random()*80)});
 }
 
+// find a random flower cell position, or null
+function randomFlowerPos(){
+  const flowers=[];
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)
+    if(grid[r][c].type==='object'&&FLOWER_TYPES.includes(grid[r][c].obj))
+      flowers.push({x:c*CELL+CELL/2,y:r*CELL+CELL/2});
+  return flowers.length?flowers[Math.floor(Math.random()*flowers.length)]:null;
+}
+
 let pondWaveT=0;
 function animLoop(){
   actx.clearRect(0,0,W,H);
   pondWaveT+=0.025;
+  // pond waves
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
     if(grid[r][c].type!=='pond')continue;
     const cell=grid[r][c],x=c*CELL,y=r*CELL;
@@ -264,11 +289,11 @@ function animLoop(){
     actx.fillStyle=`rgba(120,200,255,${0.10+0.07*wave})`;actx.fillRect(x+il,y+it+3+Math.floor(wave*1.5),ww,2);
     actx.fillStyle=`rgba(60,140,255,${0.07+0.05*wave2})`;actx.fillRect(x+il+2,y+it+8+Math.floor(wave2*1.5),ww-4,2);
   }
+  // butterflies
   butterflies.forEach(b=>{
     b.wingPhase+=b.wingSpeed;b.wanderTimer++;
     if(b.wanderTimer>b.wanderMax){b.tx=50+Math.random()*(W-100);b.ty=50+Math.random()*(H-100);b.wanderTimer=0;b.wanderMax=120+Math.floor(Math.random()*120);}
-    b.vx+=(b.tx-b.x)*0.004;b.vy+=(b.ty-b.y)*0.004;
-    b.vx*=0.97;b.vy*=0.97;
+    b.vx+=(b.tx-b.x)*0.004;b.vy+=(b.ty-b.y)*0.004;b.vx*=0.97;b.vy*=0.97;
     b.vx+=Math.sin(b.wingPhase*.3)*.04;b.vy+=Math.cos(b.wingPhase*.2)*.03;
     b.x+=b.vx;b.y+=b.vy;
     b.x=Math.max(10,Math.min(W-10,b.x));b.y=Math.max(10,Math.min(H-10,b.y));
@@ -279,6 +304,7 @@ function animLoop(){
     actx.beginPath();actx.ellipse(b.x+wx*.35,b.y+1,wx*.4,b.size*.35,.3,0,Math.PI*2);actx.fill();
     actx.fillStyle='#222';actx.fillRect(b.x-1,b.y-b.size*.5,2,b.size);
   });
+  // birds
   birds.forEach(b=>{
     b.wingPhase+=b.wingSpeed;b.soarTimer++;
     if(b.soarTimer>b.soarMax){b.vy=(Math.random()-.5)*.4;b.soarTimer=0;b.soarMax=60+Math.floor(Math.random()*80);}
@@ -292,6 +318,74 @@ function animLoop(){
     actx.beginPath();actx.moveTo(b.x,b.y);actx.quadraticCurveTo(b.x+s*1.2,b.y-flap*s*.9,b.x+s*2.2,b.y+flap*s*.3);actx.stroke();
     actx.fillStyle='#445566';actx.beginPath();actx.ellipse(b.x,b.y,s*.6,s*.3,0,0,Math.PI*2);actx.fill();
   });
+  // 🐝 bees
+  bees.forEach(b=>{
+    b.wingPhase+=b.wingSpeed;
+    b.bobPhase+=0.055;
+    b.wanderTimer++;
+    if(b.wanderTimer>b.wanderMax){
+      // 70% chance to target a flower, 30% random wander
+      const fp=randomFlowerPos();
+      if(fp&&Math.random()<0.72){b.tx=fp.x+(Math.random()-.5)*20;b.ty=fp.y+(Math.random()-.5)*20;}
+      else{b.tx=40+Math.random()*(W-80);b.ty=30+Math.random()*(H*.75);}
+      b.wanderTimer=0;b.wanderMax=80+Math.floor(Math.random()*80);
+    }
+    b.vx+=(b.tx-b.x)*0.007;
+    b.vy+=(b.ty-b.y)*0.007;
+    b.vx*=0.90;b.vy*=0.90;
+    // small jitter for organic feel
+    b.vx+=Math.sin(b.wingPhase*.35)*.07;
+    b.vy+=Math.cos(b.wingPhase*.27)*.05;
+    b.x+=b.vx;
+    b.y+=b.vy+Math.sin(b.bobPhase)*.35;
+    b.x=Math.max(8,Math.min(W-8,b.x));
+    b.y=Math.max(8,Math.min(H-8,b.y));
+
+    const s=5.5; // bee body radius
+    const wingFlap=Math.abs(Math.sin(b.wingPhase));
+
+    // wings (translucent, fast flapping = always fairly extended)
+    actx.save();
+    actx.globalAlpha=0.55+wingFlap*0.2;
+    actx.fillStyle='#ddf0ff';
+    actx.beginPath();actx.ellipse(b.x-s*0.95,b.y-s*0.6,s*(0.85+wingFlap*0.15),s*0.45,-0.35,0,Math.PI*2);actx.fill();
+    actx.beginPath();actx.ellipse(b.x+s*0.95,b.y-s*0.6,s*(0.85+wingFlap*0.15),s*0.45,0.35,0,Math.PI*2);actx.fill();
+    // lower wings (smaller)
+    actx.beginPath();actx.ellipse(b.x-s*0.7,b.y-s*0.1,s*0.55,s*0.3,-0.2,0,Math.PI*2);actx.fill();
+    actx.beginPath();actx.ellipse(b.x+s*0.7,b.y-s*0.1,s*0.55,s*0.3,0.2,0,Math.PI*2);actx.fill();
+    actx.restore();
+
+    // body — yellow base
+    actx.fillStyle='#f7c842';
+    actx.beginPath();actx.ellipse(b.x,b.y,s*0.6,s*0.95,0,0,Math.PI*2);actx.fill();
+
+    // black stripes (3 bands)
+    actx.fillStyle='rgba(20,10,0,0.82)';
+    actx.beginPath();actx.ellipse(b.x,b.y-s*0.32,s*0.58,s*0.22,0,0,Math.PI*2);actx.fill();
+    actx.beginPath();actx.ellipse(b.x,b.y+s*0.18,s*0.56,s*0.2,0,0,Math.PI*2);actx.fill();
+    actx.beginPath();actx.ellipse(b.x,b.y+s*0.65,s*0.42,s*0.18,0,0,Math.PI*2);actx.fill();
+
+    // stinger
+    actx.fillStyle='#8b6a10';
+    actx.beginPath();actx.moveTo(b.x-2,b.y+s*0.85);actx.lineTo(b.x+2,b.y+s*0.85);actx.lineTo(b.x,b.y+s*1.25);actx.closePath();actx.fill();
+
+    // head
+    actx.fillStyle='#222';
+    actx.beginPath();actx.arc(b.x,b.y-s*1.05,s*0.42,0,Math.PI*2);actx.fill();
+    // eyes
+    actx.fillStyle='#fff';
+    actx.beginPath();actx.arc(b.x-s*0.18,b.y-s*1.1,s*0.13,0,Math.PI*2);actx.fill();
+    actx.beginPath();actx.arc(b.x+s*0.18,b.y-s*1.1,s*0.13,0,Math.PI*2);actx.fill();
+
+    // antennae
+    actx.strokeStyle='#222';actx.lineWidth=1.2;
+    actx.beginPath();actx.moveTo(b.x-s*0.18,b.y-s*1.42);actx.lineTo(b.x-s*0.45,b.y-s*2.0);actx.stroke();
+    actx.beginPath();actx.moveTo(b.x+s*0.18,b.y-s*1.42);actx.lineTo(b.x+s*0.45,b.y-s*2.0);actx.stroke();
+    actx.fillStyle='#333';
+    actx.beginPath();actx.arc(b.x-s*0.45,b.y-s*2.0,s*0.18,0,Math.PI*2);actx.fill();
+    actx.beginPath();actx.arc(b.x+s*0.45,b.y-s*2.0,s*0.18,0,Math.PI*2);actx.fill();
+  });
+
   requestAnimationFrame(animLoop);
 }
 
@@ -318,10 +412,8 @@ function drawDayNightOverlay(){
 function setTimeOfDay(v){timeOfDay=parseFloat(v);document.getElementById('time-slider').value=v;drawDayNightOverlay();}
 function toggleDayNight(){
   const btn=document.getElementById('day-btn');
-  if(!isNightAuto){
-    isNightAuto=true;btn.classList.add('active');btn.textContent='⏹ STOP';
-    nightAutoTimer=setInterval(()=>{timeOfDay=(timeOfDay+0.04)%100;document.getElementById('time-slider').value=timeOfDay;drawDayNightOverlay();},60);
-  }else{isNightAuto=false;btn.classList.remove('active');btn.textContent='🌙 CYCLE';clearInterval(nightAutoTimer);}
+  if(!isNightAuto){isNightAuto=true;btn.classList.add('active');btn.textContent='⏹ STOP';nightAutoTimer=setInterval(()=>{timeOfDay=(timeOfDay+0.04)%100;document.getElementById('time-slider').value=timeOfDay;drawDayNightOverlay();},60);}
+  else{isNightAuto=false;btn.classList.remove('active');btn.textContent='🌙 CYCLE';clearInterval(nightAutoTimer);}
 }
 
 function spawnSparkles(x,y,color,n){for(let i=0;i<n;i++)sparkles.push({x,y,vx:(Math.random()-.5)*4,vy:(Math.random()-.5)*4-1,life:1,color,size:2+Math.random()*3});}
@@ -339,7 +431,13 @@ function applyTool(c,r){
   else if(tool==='butterfly'){addButterfly(c*CELL+CELL/2,r*CELL+CELL/2);spawnSparkles(c*CELL+CELL/2,r*CELL+CELL/2,'#ffccff',8);}
   else if(tool==='bird'){addBird(c*CELL+CELL/2,r*CELL+CELL/2);spawnSparkles(c*CELL+CELL/2,r*CELL+CELL/2,'#aaddff',8);}
   else if(['rose','daisy','tulip','sunflower','mushroom','stone'].includes(tool)){
-    if(cell.type!=='tall'){grid[r][c]={type:'object',obj:tool};spawnSparkles(c*CELL+CELL/2,r*CELL+CELL/2,'#ffd700',8);drawCell(c,r);}
+    if(cell.type!=='tall'){
+      grid[r][c]={type:'object',obj:tool};
+      spawnSparkles(c*CELL+CELL/2,r*CELL+CELL/2,'#ffd700',8);
+      drawCell(c,r);
+      // check for bee after placing a flower
+      if(FLOWER_TYPES.includes(tool))checkBeeSpawn();
+    }
   }
 }
 function getCell(e){
@@ -358,7 +456,7 @@ document.querySelectorAll('.tbtn[data-tool]').forEach(btn=>{
   btn.addEventListener('click',()=>{
     const t=btn.dataset.tool;
     if(t==='regrow'){initGrid();drawAll();return;}
-    if(t==='clear'){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)grid[r][c]={type:'mowed'};drawAll();return;}
+    if(t==='clear'){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)grid[r][c]={type:'mowed'};butterflies=[];birds=[];bees=[];beeSpawned=false;drawAll();return;}
     tool=t;
     document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
@@ -378,11 +476,13 @@ function randomizeGarden(){
   for(let i=0;i<4;i++){const r=2+Math.floor(Math.random()*(ROWS-4)),c=2+Math.floor(Math.random()*(COLS-4)),w=2+Math.floor(Math.random()*4),h=2+Math.floor(Math.random()*3);for(let dr=0;dr<h;dr++)for(let dc=0;dc<w;dc++){const nr=r+dr,nc=c+dc;if(nr<ROWS&&nc<COLS&&grid[nr][nc].type==='mowed')grid[nr][nc]={type:'pond',lily:Math.random()>.5,lx:3+Math.floor(Math.random()*8),ly:3+Math.floor(Math.random()*8),waveOff:Math.random()*Math.PI*2};}}
   recomputePondEdges();
   for(let i=0;i<40;i++){const r=Math.floor(Math.random()*ROWS),c=Math.floor(Math.random()*COLS);if(grid[r][c].type==='mowed')grid[r][c]={type:'object',obj:OBJECTS[Math.floor(Math.random()*OBJECTS.length)]};}
-  butterflies=[];birds=[];
+  butterflies=[];birds=[];bees=[];beeSpawned=false;
   for(let i=0;i<3+Math.floor(Math.random()*4);i++)addButterfly(40+Math.random()*(W-80),40+Math.random()*(H-80));
   for(let i=0;i<2+Math.floor(Math.random()*3);i++)addBird(Math.random()*W,20+Math.random()*(H*.3));
   drawAll();spawnSparkles(W/2,H/2,'#ffd700',30);
   document.getElementById('status').textContent='🎲 Garden randomized!';
+  // random gardens often have ≥15 flowers — check after a short delay for dramatic effect
+  setTimeout(()=>checkBeeSpawn(),800);
 }
 function saveGarden(){
   try{
@@ -401,26 +501,21 @@ function loadGarden(){
       try{
         const data=JSON.parse(ev.target.result);grid=data.grid;recomputePondEdges();
         if(data.time!=null){timeOfDay=data.time;document.getElementById('time-slider').value=timeOfDay;drawDayNightOverlay();}
-        butterflies=[];birds=[];drawAll();
+        butterflies=[];birds=[];bees=[];beeSpawned=false;drawAll();
         document.getElementById('status').textContent='📂 Garden loaded!';spawnSparkles(W/2,H/2,'#88ccff',20);
+        setTimeout(()=>checkBeeSpawn(),600);
       }catch(err){document.getElementById('status').textContent='❌ Invalid file.';}
     };reader.readAsText(file);
   };input.click();
 }
 
-// ── Resize handler ────────────────────────────────────────────────────────────
 let resizeTimer;
 window.addEventListener('resize',()=>{
   clearTimeout(resizeTimer);
-  resizeTimer=setTimeout(()=>{
-    calcDimensions();
-    initGrid();
-    drawAll();
-    drawDayNightOverlay();
-  },250);
+  resizeTimer=setTimeout(()=>{calcDimensions();initGrid();drawAll();drawDayNightOverlay();},250);
 });
 
-// ── Music ─────────────────────────────────────────────────────────────────────
+// ── Music ──────────────────────────────────────────────────────────────────
 let audioCtx=null,musicPlaying=false,schedulerTimer=null,nextNoteTime=0;
 let melIdx=0,bassIdx=0,arpIdx=0,drumIdx=0,currentSection=0,currentTrack=0;
 let melSteps=[],bassSteps=[],arpSteps=[];
@@ -453,12 +548,7 @@ function selectTrack(v){
 }
 document.addEventListener('click',e=>{if(!document.getElementById('music-wrap').contains(e.target))document.getElementById('track-dropdown').classList.remove('open');});
 
-function dismissWelcome(){
-  const w=document.getElementById('welcome');
-  w.classList.add('hiding');
-  setTimeout(()=>w.remove(),380);
-}
-// Auto-dismiss after 9s
+function dismissWelcome(){const w=document.getElementById('welcome');w.classList.add('hiding');setTimeout(()=>w.remove(),380);}
 setTimeout(()=>{const w=document.getElementById('welcome');if(w)dismissWelcome();},9000);
 
 // Boot
