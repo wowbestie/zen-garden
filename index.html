@@ -641,7 +641,12 @@ tryRestoreSession().then(restored=>{
     document.getElementById('welcome-body').innerHTML='your garden has been <span>waiting for you</span> ✿<br>keep growing something<br>beautiful 🌸';
     document.getElementById('welcome-close').textContent='back to the garden ✿';
   }
-  toggleDayNight();
+  // start cycle by default
+  isNightAuto=true;
+  const dayBtn=document.getElementById('day-btn');
+  dayBtn.classList.add('active');
+  dayBtn.textContent='⏹ STOP';
+  nightAutoTimer=setInterval(()=>{timeOfDay=(timeOfDay+0.04)%100;document.getElementById('time-slider').value=timeOfDay;drawDayNightOverlay();},60);
   const startMusicOnce=()=>{startMusic();const btn=document.getElementById('music-btn');btn.classList.add('active');const label=document.querySelector(`.track-opt[data-track="${currentTrack}"]`).textContent;btn.textContent=`🔊 ${label}`;musicPlaying=true;document.removeEventListener('pointerdown',startMusicOnce);};
   document.addEventListener('pointerdown',startMusicOnce);
 });
