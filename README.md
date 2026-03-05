@@ -14,3 +14,6 @@ i made a little browser game where you can mow grass and plant flowers. no frame
 
 ## the tech stuff
 pure html canvas + web audio api. zero dependencies. one file.
+
+## try it
+[visit the garden →](https://wowbestie.github.io/zen-garden/)
