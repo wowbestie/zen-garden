@@ -42,7 +42,6 @@ canvas{display:block;image-rendering:pixelated;}
 .tbtn-ico{font-size:clamp(12px,3.5vw,16px);line-height:1;}
 .tbtn-lbl{font-size:clamp(4px,1.1vw,5px);}
 #status{color:#aaffaa;font-size:clamp(4px,1.3vw,6px);text-shadow:1px 1px #000;margin-top:6px;text-align:center;padding:0 8px;}
-/* bee toast */
 #bee-toast{display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a0a2e;border:3px solid #f7c842;box-shadow:3px 3px 0 #000,0 0 16px #f7c84244;padding:10px 16px;z-index:300;text-align:center;animation:beeSlide .5s ease;}
 @keyframes beeSlide{from{opacity:0;transform:translateX(-50%) translateY(20px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
 #bee-toast p{color:#f7c842;font-family:'Press Start 2P',monospace;font-size:clamp(5px,1.3vw,7px);line-height:1.8;}
@@ -144,63 +143,40 @@ function calcDimensions(){
 // ── State ──────────────────────────────────────────────────────────────────
 let grid=[],sparkles=[],tool='mow',painting=false;
 let timeOfDay=30,isNightAuto=false,nightAutoTimer=null;
-let butterflies=[],birds=[],bees=[];
+let butterflies=[],birds=[],bees=[],owls=[],foxes=[];
 let stars=[];
-let beeSpawned=false; // tracks if bee has ever been spawned this session
+let beeSpawned=false;
 const FLOWER_TYPES=['rose','daisy','tulip','sunflower'];
 const BEE_THRESHOLD=15;
 const TALL_COLORS=['#2d7a2d','#3a9a3a','#256825','#1e5c1e','#48b848'];
 
+function getNightDepth(){
+  const b=Math.sin(timeOfDay/100*Math.PI*2);
+  return b<0?Math.min(1,-b):0;
+}
 function countFlowers(){
   let n=0;
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)
     if(grid[r][c].type==='object'&&FLOWER_TYPES.includes(grid[r][c].obj))n++;
   return n;
 }
-
 function checkBeeSpawn(){
   if(beeSpawned||bees.length>0)return;
-  if(countFlowers()>=BEE_THRESHOLD){
-    beeSpawned=true;
-    // enter from a random edge
-    const ex=Math.random()<.5?-20:W+20,ey=20+Math.random()*H*.4;
-    addBee(ex,ey);
-    showBeeToast();
-    spawnSparkles(W/2,H*.3,'#f7c842',25);
-  }
+  if(countFlowers()>=BEE_THRESHOLD){beeSpawned=true;const ex=Math.random()<.5?-20:W+20,ey=20+Math.random()*H*.4;addBee(ex,ey);showBeeToast();spawnSparkles(W/2,H*.3,'#f7c842',25);}
 }
-
-function showBeeToast(){
-  const t=document.getElementById('bee-toast');
-  t.style.display='block';
-  clearTimeout(t._timer);
-  t._timer=setTimeout(()=>{t.style.display='none';},4200);
-}
-
-function addBee(x,y){
-  bees.push({
-    x,y,tx:x+50,ty:y+50,
-    vx:0,vy:0,
-    wingPhase:Math.random()*Math.PI*2,
-    wingSpeed:0.28+Math.random()*0.08,
-    bobPhase:Math.random()*Math.PI*2,
-    wanderTimer:0,
-    wanderMax:90+Math.floor(Math.random()*70),
-  });
-}
+function showBeeToast(){const t=document.getElementById('bee-toast');t.style.display='block';clearTimeout(t._timer);t._timer=setTimeout(()=>{t.style.display='none';},4200);}
 
 function initGrid(){
   grid=[];
   for(let r=0;r<ROWS;r++){grid[r]=[];for(let c=0;c<COLS;c++)grid[r][c]={type:'tall',variant:Math.floor(Math.random()*5)};}
-  butterflies=[];birds=[];bees=[];beeSpawned=false;
+  butterflies=[];birds=[];bees=[];owls=[];foxes=[];beeSpawned=false;
 }
 function isPond(r,c){return r>=0&&r<ROWS&&c>=0&&c<COLS&&grid[r]&&grid[r][c]&&grid[r][c].type==='pond';}
 function recomputePondEdges(){
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
     if(!isPond(r,c))continue;
     const cell=grid[r][c];
-    cell.edgeT=!isPond(r-1,c);cell.edgeB=!isPond(r+1,c);
-    cell.edgeL=!isPond(r,c-1);cell.edgeR=!isPond(r,c+1);
+    cell.edgeT=!isPond(r-1,c);cell.edgeB=!isPond(r+1,c);cell.edgeL=!isPond(r,c-1);cell.edgeR=!isPond(r,c+1);
   }
 }
 function placePond(c,r){
@@ -263,14 +239,93 @@ function addButterfly(x,y){
 function addBird(x,y){
   birds.push({x,y,vx:(Math.random()>.5?1:-1)*(1.2+Math.random()*.8),vy:-(0.2+Math.random()*.3),wingPhase:Math.random()*Math.PI*2,wingSpeed:0.18+Math.random()*.07,size:5+Math.random()*3,soarTimer:0,soarMax:60+Math.floor(Math.random()*80)});
 }
-
-// find a random flower cell position, or null
+function addBee(x,y){
+  bees.push({x,y,tx:x+50,ty:y+50,vx:0,vy:0,wingPhase:Math.random()*Math.PI*2,wingSpeed:0.28+Math.random()*0.08,bobPhase:Math.random()*Math.PI*2,wanderTimer:0,wanderMax:90+Math.floor(Math.random()*70)});
+}
+function addFox(){
+  const left=Math.random()<.5;
+  foxes.push({
+    x:left?-50:W+50,
+    y:H*.72,
+    tx:40+Math.random()*(W-80),
+    ty:H*.65+Math.random()*H*.18,
+    dir:left?1:-1,
+    // leap state
+    leaping:false,
+    leapT:0,        // 0→1 progress through current leap
+    leapSpeed:0.07, // how fast leapT advances per frame
+    leapFromX:0, leapFromY:0,
+    leapToX:0,   leapToY:0,
+    leapHeight:22,  // peak arc height in px
+    // hop anim phase (advances each leap)
+    hopPhase:0,
+    // wander
+    wanderTimer:0,
+    wanderMax:60+Math.floor(Math.random()*100),
+    restTimer:0,
+    restMax:0,      // frames to rest between leaps
+  });
+}
 function randomFlowerPos(){
-  const flowers=[];
-  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)
-    if(grid[r][c].type==='object'&&FLOWER_TYPES.includes(grid[r][c].obj))
-      flowers.push({x:c*CELL+CELL/2,y:r*CELL+CELL/2});
-  return flowers.length?flowers[Math.floor(Math.random()*flowers.length)]:null;
+  const fl=[];
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(grid[r][c].type==='object'&&FLOWER_TYPES.includes(grid[r][c].obj))fl.push({x:c*CELL+CELL/2,y:r*CELL+CELL/2});
+  return fl.length?fl[Math.floor(Math.random()*fl.length)]:null;
+}
+
+// ── 8-bit pixel sprite helpers ─────────────────────────────────────────────
+function drawOwlPixel(ctx, cx, cy, wingPhase, blink){
+  const S=3;
+  const p=(dx,dy,c)=>{ctx.fillStyle=c;ctx.fillRect(~~(cx+dx*S),~~(cy+dy*S),S,S);};
+  const BR='#7a5230',DK='#3d2010',YE='#f5c018',TN='#c8a870',WG='#5a3d1a',OR='#c88018';
+  const up=Math.sin(wingPhase)>0;
+  const wy=up?-1:0;
+  // wings (behind body)
+  [[-4,0],[-3,0],[-4,1],[-3,1],[-2,1]].forEach(([dx,dy])=>p(dx,dy+wy,WG));
+  [[3,0],[4,0],[2,1],[3,1],[4,1]].forEach(([dx,dy])=>p(dx,dy+wy,WG));
+  // ear tufts
+  p(-1,-5,DK);p(0,-5,DK);
+  // head row
+  for(let dx=-2;dx<=2;dx++)p(dx,-4,BR);
+  // eyes + beak row
+  p(-2,-3,BR);p(-1,-3,blink?DK:YE);p(0,-3,OR);p(1,-3,blink?DK:YE);p(2,-3,BR);
+  // face row
+  for(let dx=-2;dx<=2;dx++)p(dx,-2,dx===0?OR:dx===1||dx===-1?TN:BR);
+  // body
+  for(let dy=-1;dy<=1;dy++)for(let dx=-2;dx<=2;dx++)p(dx,dy,dy===1||Math.abs(dx)===2?BR:TN);
+  // feet
+  p(-1,2,OR);p(1,2,OR);
+}
+
+function drawFoxPixel(ctx, cx, cy, dir, hopPhase){
+  const S=2;
+  // dir 1=right -1=left; flip dx
+  const p=(dx,dy,c)=>{ctx.fillStyle=c;ctx.fillRect(~~(cx+(dir>0?dx:-dx)*S),~~(cy+dy*S),S,S);};
+  const F='#d85c18',L='#e8a878',W='#f0efe0',PK='#e07080',K='#111111',Y='#e8c020';
+  // white tail tip
+  p(-7,0,W);p(-8,0,W);p(-7,1,W);
+  // tail body
+  p(-6,-1,F);p(-5,-1,F);p(-4,-1,F);
+  p(-6,0,F);p(-5,0,F);p(-4,0,F);p(-3,0,F);
+  p(-5,1,F);p(-6,1,F);
+  // body
+  for(let dx=-2;dx<=2;dx++)p(dx,0,F);
+  for(let dx=-2;dx<=2;dx++)p(dx,1,Math.abs(dx)<=1?L:F);
+  for(let dx=-2;dx<=2;dx++)p(dx,2,Math.abs(dx)<=1?L:F);
+  // legs (3 visible, alternating)
+  const la=Math.sin(hopPhase)>0;
+  [[-2,la],[0,!la],[2,la]].forEach(([lx,dn])=>{p(lx,3,F);p(lx,4,dn?L:F);});
+  // neck
+  p(3,0,F);p(3,1,F);p(3,2,F);
+  // head
+  for(let dx=3;dx<=5;dx++){p(dx,-2,F);p(dx,-1,F);}
+  // ear + inner ear
+  p(4,-3,F);p(5,-3,F);p(5,-4,PK);
+  // eye
+  p(4,-1,Y);
+  // snout
+  p(5,0,L);p(6,0,L);p(6,1,L);
+  // nose (overlays snout tip)
+  p(6,0,K);
 }
 
 let pondWaveT=0;
@@ -318,74 +373,97 @@ function animLoop(){
     actx.beginPath();actx.moveTo(b.x,b.y);actx.quadraticCurveTo(b.x+s*1.2,b.y-flap*s*.9,b.x+s*2.2,b.y+flap*s*.3);actx.stroke();
     actx.fillStyle='#445566';actx.beginPath();actx.ellipse(b.x,b.y,s*.6,s*.3,0,0,Math.PI*2);actx.fill();
   });
-  // 🐝 bees
+  // bees
   bees.forEach(b=>{
-    b.wingPhase+=b.wingSpeed;
-    b.bobPhase+=0.055;
-    b.wanderTimer++;
-    if(b.wanderTimer>b.wanderMax){
-      // 70% chance to target a flower, 30% random wander
-      const fp=randomFlowerPos();
-      if(fp&&Math.random()<0.72){b.tx=fp.x+(Math.random()-.5)*20;b.ty=fp.y+(Math.random()-.5)*20;}
-      else{b.tx=40+Math.random()*(W-80);b.ty=30+Math.random()*(H*.75);}
-      b.wanderTimer=0;b.wanderMax=80+Math.floor(Math.random()*80);
-    }
-    b.vx+=(b.tx-b.x)*0.007;
-    b.vy+=(b.ty-b.y)*0.007;
-    b.vx*=0.90;b.vy*=0.90;
-    // small jitter for organic feel
-    b.vx+=Math.sin(b.wingPhase*.35)*.07;
-    b.vy+=Math.cos(b.wingPhase*.27)*.05;
-    b.x+=b.vx;
-    b.y+=b.vy+Math.sin(b.bobPhase)*.35;
-    b.x=Math.max(8,Math.min(W-8,b.x));
-    b.y=Math.max(8,Math.min(H-8,b.y));
-
-    const s=5.5; // bee body radius
-    const wingFlap=Math.abs(Math.sin(b.wingPhase));
-
-    // wings (translucent, fast flapping = always fairly extended)
-    actx.save();
-    actx.globalAlpha=0.55+wingFlap*0.2;
-    actx.fillStyle='#ddf0ff';
-    actx.beginPath();actx.ellipse(b.x-s*0.95,b.y-s*0.6,s*(0.85+wingFlap*0.15),s*0.45,-0.35,0,Math.PI*2);actx.fill();
-    actx.beginPath();actx.ellipse(b.x+s*0.95,b.y-s*0.6,s*(0.85+wingFlap*0.15),s*0.45,0.35,0,Math.PI*2);actx.fill();
-    // lower wings (smaller)
-    actx.beginPath();actx.ellipse(b.x-s*0.7,b.y-s*0.1,s*0.55,s*0.3,-0.2,0,Math.PI*2);actx.fill();
-    actx.beginPath();actx.ellipse(b.x+s*0.7,b.y-s*0.1,s*0.55,s*0.3,0.2,0,Math.PI*2);actx.fill();
+    b.wingPhase+=b.wingSpeed;b.bobPhase+=0.055;b.wanderTimer++;
+    if(b.wanderTimer>b.wanderMax){const fp=randomFlowerPos();if(fp&&Math.random()<0.72){b.tx=fp.x+(Math.random()-.5)*20;b.ty=fp.y+(Math.random()-.5)*20;}else{b.tx=40+Math.random()*(W-80);b.ty=30+Math.random()*(H*.75);}b.wanderTimer=0;b.wanderMax=80+Math.floor(Math.random()*80);}
+    b.vx+=(b.tx-b.x)*0.007;b.vy+=(b.ty-b.y)*0.007;b.vx*=0.90;b.vy*=0.90;
+    b.vx+=Math.sin(b.wingPhase*.35)*.07;b.vy+=Math.cos(b.wingPhase*.27)*.05;
+    b.x+=b.vx;b.y+=b.vy+Math.sin(b.bobPhase)*.35;
+    b.x=Math.max(8,Math.min(W-8,b.x));b.y=Math.max(8,Math.min(H-8,b.y));
+    const s=5.5,wingFlap=Math.abs(Math.sin(b.wingPhase));
+    actx.save();actx.globalAlpha=0.55+wingFlap*0.2;actx.fillStyle='#ddf0ff';
+    actx.beginPath();actx.ellipse(b.x-s*.95,b.y-s*.6,s*(.85+wingFlap*.15),s*.45,-.35,0,Math.PI*2);actx.fill();
+    actx.beginPath();actx.ellipse(b.x+s*.95,b.y-s*.6,s*(.85+wingFlap*.15),s*.45,.35,0,Math.PI*2);actx.fill();
+    actx.beginPath();actx.ellipse(b.x-s*.7,b.y-s*.1,s*.55,s*.3,-.2,0,Math.PI*2);actx.fill();
+    actx.beginPath();actx.ellipse(b.x+s*.7,b.y-s*.1,s*.55,s*.3,.2,0,Math.PI*2);actx.fill();
     actx.restore();
-
-    // body — yellow base
-    actx.fillStyle='#f7c842';
-    actx.beginPath();actx.ellipse(b.x,b.y,s*0.6,s*0.95,0,0,Math.PI*2);actx.fill();
-
-    // black stripes (3 bands)
+    actx.fillStyle='#f7c842';actx.beginPath();actx.ellipse(b.x,b.y,s*.6,s*.95,0,0,Math.PI*2);actx.fill();
     actx.fillStyle='rgba(20,10,0,0.82)';
-    actx.beginPath();actx.ellipse(b.x,b.y-s*0.32,s*0.58,s*0.22,0,0,Math.PI*2);actx.fill();
-    actx.beginPath();actx.ellipse(b.x,b.y+s*0.18,s*0.56,s*0.2,0,0,Math.PI*2);actx.fill();
-    actx.beginPath();actx.ellipse(b.x,b.y+s*0.65,s*0.42,s*0.18,0,0,Math.PI*2);actx.fill();
-
-    // stinger
-    actx.fillStyle='#8b6a10';
-    actx.beginPath();actx.moveTo(b.x-2,b.y+s*0.85);actx.lineTo(b.x+2,b.y+s*0.85);actx.lineTo(b.x,b.y+s*1.25);actx.closePath();actx.fill();
-
-    // head
-    actx.fillStyle='#222';
-    actx.beginPath();actx.arc(b.x,b.y-s*1.05,s*0.42,0,Math.PI*2);actx.fill();
-    // eyes
-    actx.fillStyle='#fff';
-    actx.beginPath();actx.arc(b.x-s*0.18,b.y-s*1.1,s*0.13,0,Math.PI*2);actx.fill();
-    actx.beginPath();actx.arc(b.x+s*0.18,b.y-s*1.1,s*0.13,0,Math.PI*2);actx.fill();
-
-    // antennae
+    actx.beginPath();actx.ellipse(b.x,b.y-s*.32,s*.58,s*.22,0,0,Math.PI*2);actx.fill();
+    actx.beginPath();actx.ellipse(b.x,b.y+s*.18,s*.56,s*.2,0,0,Math.PI*2);actx.fill();
+    actx.beginPath();actx.ellipse(b.x,b.y+s*.65,s*.42,s*.18,0,0,Math.PI*2);actx.fill();
+    actx.fillStyle='#8b6a10';actx.beginPath();actx.moveTo(b.x-2,b.y+s*.85);actx.lineTo(b.x+2,b.y+s*.85);actx.lineTo(b.x,b.y+s*1.25);actx.closePath();actx.fill();
+    actx.fillStyle='#222';actx.beginPath();actx.arc(b.x,b.y-s*1.05,s*.42,0,Math.PI*2);actx.fill();
+    actx.fillStyle='#fff';actx.beginPath();actx.arc(b.x-s*.18,b.y-s*1.1,s*.13,0,Math.PI*2);actx.fill();
+    actx.beginPath();actx.arc(b.x+s*.18,b.y-s*1.1,s*.13,0,Math.PI*2);actx.fill();
     actx.strokeStyle='#222';actx.lineWidth=1.2;
-    actx.beginPath();actx.moveTo(b.x-s*0.18,b.y-s*1.42);actx.lineTo(b.x-s*0.45,b.y-s*2.0);actx.stroke();
-    actx.beginPath();actx.moveTo(b.x+s*0.18,b.y-s*1.42);actx.lineTo(b.x+s*0.45,b.y-s*2.0);actx.stroke();
-    actx.fillStyle='#333';
-    actx.beginPath();actx.arc(b.x-s*0.45,b.y-s*2.0,s*0.18,0,Math.PI*2);actx.fill();
-    actx.beginPath();actx.arc(b.x+s*0.45,b.y-s*2.0,s*0.18,0,Math.PI*2);actx.fill();
+    actx.beginPath();actx.moveTo(b.x-s*.18,b.y-s*1.42);actx.lineTo(b.x-s*.45,b.y-s*2.0);actx.stroke();
+    actx.beginPath();actx.moveTo(b.x+s*.18,b.y-s*1.42);actx.lineTo(b.x+s*.45,b.y-s*2.0);actx.stroke();
+    actx.fillStyle='#333';actx.beginPath();actx.arc(b.x-s*.45,b.y-s*2.0,s*.18,0,Math.PI*2);actx.fill();
+    actx.beginPath();actx.arc(b.x+s*.45,b.y-s*2.0,s*.18,0,Math.PI*2);actx.fill();
   });
 
+  // ── night creatures ────────────────────────────────────────────────────
+  const nd=getNightDepth();
+  const isNight=nd>0;
+  if(isNight&&nd>.28){
+    if(foxes.length===0&&Math.random()<.002)addFox();
+  }
+  if(!isNight){owls=[];foxes=[];}
+
+  const nightAlpha=Math.min(1,nd*4);
+  actx.globalAlpha=nightAlpha;
+
+  // ── fox (8-bit leap movement) ──
+  foxes.forEach(f=>{
+    f.wanderTimer++;
+    if(f.wanderTimer>f.wanderMax){
+      f.tx=40+Math.random()*(W-80);
+      f.ty=H*.60+Math.random()*H*.22;
+      f.wanderTimer=0;
+      f.wanderMax=60+Math.floor(Math.random()*100);
+    }
+
+    const atTarget=Math.abs(f.tx-f.x)<8&&Math.abs(f.ty-f.y)<8;
+
+    if(f.leaping){
+      // advance leap
+      f.leapT=Math.min(1,f.leapT+f.leapSpeed);
+      // integer-snap x/y position along the arc
+      f.x=Math.round(f.leapFromX+(f.leapToX-f.leapFromX)*f.leapT);
+      f.y=Math.round(f.leapFromY+(f.leapToY-f.leapFromY)*f.leapT);
+      // parabolic arc — highest at t=0.5
+      const arc=Math.sin(f.leapT*Math.PI)*f.leapHeight;
+      // hop phase advances through the leap for leg animation
+      f.hopPhase=f.leapT*Math.PI;
+
+      if(f.leapT>=1){
+        f.leaping=false;
+        f.restTimer=0;
+        f.restMax=10+Math.floor(Math.random()*25); // short pause after landing
+      }
+      drawFoxPixel(actx,f.x,f.y-arc,f.dir,f.hopPhase);
+    } else {
+      // resting between leaps
+      f.restTimer++;
+      if(f.restTimer>f.restMax&&!atTarget){
+        // kick off next leap toward target (or a step toward it)
+        const dx=f.tx-f.x, dy=f.ty-f.y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        const stepDist=Math.min(dist,28+Math.random()*20); // leap size in px
+        f.leapFromX=f.x; f.leapFromY=f.y;
+        f.leapToX=Math.round(Math.max(20,Math.min(W-20,f.x+(dx/dist)*stepDist)));
+        f.leapToY=Math.round(Math.max(H*.55,Math.min(H*.88,f.y+(dy/dist)*stepDist)));
+        if(Math.abs(dx)>4)f.dir=dx>0?1:-1;
+        f.leapT=0;
+        f.leaping=true;
+      }
+      drawFoxPixel(actx,f.x,f.y,f.dir,0);
+    }
+  });
+
+  actx.globalAlpha=1;
   requestAnimationFrame(animLoop);
 }
 
@@ -416,11 +494,6 @@ function toggleDayNight(){
   else{isNightAuto=false;btn.classList.remove('active');btn.textContent='🌙 CYCLE';clearInterval(nightAutoTimer);}
 }
 
-let saveTimer;
-function debouncedSave(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>autoSave(),600);}
-// also save immediately on any interaction so rapid refresh doesn't lose state
-function saveNow(){clearTimeout(saveTimer);autoSave();}
-
 function spawnSparkles(x,y,color,n){for(let i=0;i<n;i++)sparkles.push({x,y,vx:(Math.random()-.5)*4,vy:(Math.random()-.5)*4-1,life:1,color,size:2+Math.random()*3});}
 function sparkleLoop(){
   sctx.clearRect(0,0,W,H);sparkles=sparkles.filter(s=>s.life>0);
@@ -436,19 +509,10 @@ function applyTool(c,r){
   else if(tool==='butterfly'){addButterfly(c*CELL+CELL/2,r*CELL+CELL/2);spawnSparkles(c*CELL+CELL/2,r*CELL+CELL/2,'#ffccff',8);saveNow();}
   else if(tool==='bird'){addBird(c*CELL+CELL/2,r*CELL+CELL/2);spawnSparkles(c*CELL+CELL/2,r*CELL+CELL/2,'#aaddff',8);saveNow();}
   else if(['rose','daisy','tulip','sunflower','mushroom','stone'].includes(tool)){
-    if(cell.type!=='tall'){
-      grid[r][c]={type:'object',obj:tool};
-      spawnSparkles(c*CELL+CELL/2,r*CELL+CELL/2,'#ffd700',8);
-      drawCell(c,r);
-      if(FLOWER_TYPES.includes(tool))checkBeeSpawn();
-      debouncedSave();
-    }
+    if(cell.type!=='tall'){grid[r][c]={type:'object',obj:tool};spawnSparkles(c*CELL+CELL/2,r*CELL+CELL/2,'#ffd700',8);drawCell(c,r);if(FLOWER_TYPES.includes(tool))checkBeeSpawn();debouncedSave();}
   }
 }
-function getCell(e){
-  const rect=garden.getBoundingClientRect();
-  return[Math.floor((e.clientX-rect.left)/CELL),Math.floor((e.clientY-rect.top)/CELL)];
-}
+function getCell(e){const rect=garden.getBoundingClientRect();return[Math.floor((e.clientX-rect.left)/CELL),Math.floor((e.clientY-rect.top)/CELL)];}
 garden.addEventListener('mousedown',e=>{painting=true;applyTool(...getCell(e));});
 garden.addEventListener('mousemove',e=>{if(!painting)return;applyTool(...getCell(e));});
 garden.addEventListener('mouseup',()=>painting=false);
@@ -461,7 +525,7 @@ document.querySelectorAll('.tbtn[data-tool]').forEach(btn=>{
   btn.addEventListener('click',()=>{
     const t=btn.dataset.tool;
     if(t==='regrow'){initGrid();drawAll();saveNow();return;}
-    if(t==='clear'){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)grid[r][c]={type:'mowed'};butterflies=[];birds=[];bees=[];beeSpawned=false;drawAll();saveNow();return;}
+    if(t==='clear'){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)grid[r][c]={type:'mowed'};butterflies=[];birds=[];bees=[];owls=[];foxes=[];beeSpawned=false;drawAll();saveNow();return;}
     tool=t;
     document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
@@ -481,7 +545,6 @@ function randomizeGarden(){
   for(let i=0;i<4;i++){const r=2+Math.floor(Math.random()*(ROWS-4)),c=2+Math.floor(Math.random()*(COLS-4)),w=2+Math.floor(Math.random()*4),h=2+Math.floor(Math.random()*3);for(let dr=0;dr<h;dr++)for(let dc=0;dc<w;dc++){const nr=r+dr,nc=c+dc;if(nr<ROWS&&nc<COLS&&grid[nr][nc].type==='mowed')grid[nr][nc]={type:'pond',lily:Math.random()>.5,lx:3+Math.floor(Math.random()*8),ly:3+Math.floor(Math.random()*8),waveOff:Math.random()*Math.PI*2};}}
   recomputePondEdges();
   for(let i=0;i<40;i++){const r=Math.floor(Math.random()*ROWS),c=Math.floor(Math.random()*COLS);if(grid[r][c].type==='mowed')grid[r][c]={type:'object',obj:OBJECTS[Math.floor(Math.random()*OBJECTS.length)]};}
-  butterflies=[];birds=[];bees=[];beeSpawned=false;
   for(let i=0;i<3+Math.floor(Math.random()*4);i++)addButterfly(40+Math.random()*(W-80),40+Math.random()*(H-80));
   for(let i=0;i<2+Math.floor(Math.random()*3);i++)addBird(Math.random()*W,20+Math.random()*(H*.3));
   drawAll();spawnSparkles(W/2,H/2,'#ffd700',30);
@@ -489,35 +552,47 @@ function randomizeGarden(){
   setTimeout(()=>{checkBeeSpawn();saveNow();},800);
 }
 function saveGarden(){
-  try{
-    const data={grid:grid.map(row=>row.map(c=>({...c}))),time:timeOfDay,cols:COLS,rows:ROWS};
-    const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
-    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='zen-garden.json';a.click();URL.revokeObjectURL(a.href);
-    document.getElementById('status').textContent='💾 Garden saved!';spawnSparkles(W/2,H/2,'#aaffaa',20);
-  }catch(e){document.getElementById('status').textContent='❌ Save failed.';}
+  try{const data={grid:grid.map(row=>row.map(c=>({...c}))),time:timeOfDay,cols:COLS,rows:ROWS};const blob=new Blob([JSON.stringify(data)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='zen-garden.json';a.click();URL.revokeObjectURL(a.href);document.getElementById('status').textContent='💾 Garden saved!';spawnSparkles(W/2,H/2,'#aaffaa',20);}catch(e){document.getElementById('status').textContent='❌ Save failed.';}
 }
 function loadGarden(){
   const input=document.createElement('input');input.type='file';input.accept='.json';
-  input.onchange=e=>{
-    const file=e.target.files[0];if(!file)return;
-    const reader=new FileReader();
-    reader.onload=ev=>{
-      try{
-        const data=JSON.parse(ev.target.result);grid=data.grid;recomputePondEdges();
-        if(data.time!=null){timeOfDay=data.time;document.getElementById('time-slider').value=timeOfDay;drawDayNightOverlay();}
-        butterflies=[];birds=[];bees=[];beeSpawned=false;drawAll();
-        document.getElementById('status').textContent='📂 Garden loaded!';spawnSparkles(W/2,H/2,'#88ccff',20);
-        setTimeout(()=>checkBeeSpawn(),600);
-      }catch(err){document.getElementById('status').textContent='❌ Invalid file.';}
-    };reader.readAsText(file);
-  };input.click();
+  input.onchange=e=>{const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=ev=>{try{const data=JSON.parse(ev.target.result);grid=data.grid;recomputePondEdges();if(data.time!=null){timeOfDay=data.time;document.getElementById('time-slider').value=timeOfDay;drawDayNightOverlay();}butterflies=[];birds=[];bees=[];owls=[];foxes=[];beeSpawned=false;drawAll();document.getElementById('status').textContent='📂 Garden loaded!';spawnSparkles(W/2,H/2,'#88ccff',20);setTimeout(()=>checkBeeSpawn(),600);}catch(err){document.getElementById('status').textContent='❌ Invalid file.';}};reader.readAsText(file);};input.click();
 }
 
 let resizeTimer;
-window.addEventListener('resize',()=>{
-  clearTimeout(resizeTimer);
-  resizeTimer=setTimeout(()=>{calcDimensions();initGrid();drawAll();drawDayNightOverlay();},250);
-});
+window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{calcDimensions();initGrid();drawAll();drawDayNightOverlay();},250);});
+
+// ── Persistence ────────────────────────────────────────────────────────────
+const SAVE_KEY='zen-garden-session';
+async function autoSave(){
+  try{const data={grid:grid.map(row=>row.map(c=>({...c}))),time:timeOfDay,beeSpawned,butterflyCount:butterflies.length,birdCount:birds.length};await window.storage.set(SAVE_KEY,JSON.stringify(data));}
+  catch(e){console.warn('zen-garden save failed:',e);}
+}
+window.addEventListener('beforeunload',()=>{autoSave();});
+let saveTimer;
+function debouncedSave(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>autoSave(),600);}
+function saveNow(){clearTimeout(saveTimer);autoSave();}
+
+async function tryRestoreSession(){
+  try{
+    const result=await window.storage.get(SAVE_KEY);
+    if(!result||!result.value)return false;
+    const data=JSON.parse(result.value);
+    if(!data.grid)return false;
+    grid=data.grid;
+    for(let r=0;r<grid.length;r++)for(let c=0;c<grid[r].length;c++){if(!grid[r][c])grid[r][c]={type:'mowed'};}
+    recomputePondEdges();
+    if(data.time!=null){timeOfDay=data.time;document.getElementById('time-slider').value=timeOfDay;}
+    beeSpawned=!!data.beeSpawned;
+    butterflies=[];birds=[];bees=[];owls=[];foxes=[];
+    for(let i=0;i<(data.butterflyCount||0);i++)addButterfly(40+Math.random()*(W-80),40+Math.random()*(H-80));
+    for(let i=0;i<(data.birdCount||0);i++)addBird(Math.random()*W,20+Math.random()*(H*.3));
+    if(beeSpawned)addBee(40+Math.random()*(W-80),30+Math.random()*(H*.4));
+    drawAll();drawDayNightOverlay();
+    document.getElementById('status').textContent='🌿 Welcome back to your garden!';
+    return true;
+  }catch(e){return false;}
+}
 
 // ── Music ──────────────────────────────────────────────────────────────────
 let audioCtx=null,musicPlaying=false,schedulerTimer=null,nextNoteTime=0;
@@ -530,9 +605,9 @@ const TRACKS=[
 ];
 function expandSeq(seq){const out=[];for(const[n,d]of seq)out.push(...Array(d).fill({freq:N[n]||0}));return out;}
 function playNote(freq,t,dur,type='square',gain=0.15){if(!freq||!audioCtx)return;const o=audioCtx.createOscillator(),g=audioCtx.createGain(),f=audioCtx.createBiquadFilter();f.type='lowpass';f.frequency.value=2000;f.Q.value=.8;o.connect(f);f.connect(g);g.connect(audioCtx.destination);o.type=type;o.frequency.setValueAtTime(freq,t);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(gain,t+.012);g.gain.setValueAtTime(gain,t+dur*.6);g.gain.linearRampToValueAtTime(0,t+dur*.92);o.start(t);o.stop(t+dur);}
-function playDrum(t,isKick){if(!audioCtx)return;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);if(isKick){o.frequency.setValueAtTime(160,t);o.frequency.exponentialRampToValueAtTime(40,t+.12);g.gain.setValueAtTime(.32,t);g.gain.exponentialRampToValueAtTime(.001,t+.18);}else{o.type='sawtooth';o.frequency.setValueAtTime(110,t);g.gain.setValueAtTime(.1,t);g.gain.exponentialRampToValueAtTime(.001,t+.08);const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*.09,audioCtx.sampleRate);const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;const src=audioCtx.createBufferSource(),ng=audioCtx.createGain();src.buffer=buf;src.connect(ng);ng.connect(audioCtx.destination);ng.gain.setValueAtTime(.08,t);ng.gain.exponentialRampToValueAtTime(.001,t+.09);src.start(t);}o.start(t);o.stop(t+.2);}
+function playDrum(t,isKick){if(!audioCtx)return;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);if(isKick){o.frequency.setValueAtTime(160,t);o.frequency.exponentialRampToValueAtTime(40,t+.12);g.gain.setValueAtTime(.16,t);g.gain.exponentialRampToValueAtTime(.001,t+.18);}else{o.type='sawtooth';o.frequency.setValueAtTime(110,t);g.gain.setValueAtTime(.05,t);g.gain.exponentialRampToValueAtTime(.001,t+.08);const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*.09,audioCtx.sampleRate);const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;const src=audioCtx.createBufferSource(),ng=audioCtx.createGain();src.buffer=buf;src.connect(ng);ng.connect(audioCtx.destination);ng.gain.setValueAtTime(.04,t);ng.gain.exponentialRampToValueAtTime(.001,t+.09);src.start(t);}o.start(t);o.stop(t+.2);}
 function loadSection(si){const tr=TRACKS[currentTrack],sec=tr.sections[si%tr.sections.length];melSteps=expandSeq(sec.mel);bassSteps=expandSeq(sec.bass);arpSteps=sec.arp.map(n=>({freq:N[n]||0}));melIdx=0;bassIdx=0;arpIdx=0;drumIdx=0;}
-function scheduler(){const tr=TRACKS[currentTrack],STEP=60/tr.bpm/4;while(nextNoteTime<audioCtx.currentTime+.1){const t=nextNoteTime,step=drumIdx%16;if(melIdx<melSteps.length){playNote(melSteps[melIdx].freq,t,STEP*.85,tr.type,.16);melIdx++;}if(bassIdx<bassSteps.length){playNote(bassSteps[bassIdx].freq,t,STEP*.7,tr.type,.13);bassIdx++;}playNote(arpSteps[arpIdx%arpSteps.length].freq,t,STEP*.5,tr.arpType,.07);arpIdx++;if(step===0||step===8)playDrum(t,true);if(step===4||step===12)playDrum(t,false);drumIdx++;nextNoteTime+=STEP;if(melIdx>=melSteps.length){currentSection=(currentSection+1)%TRACKS[currentTrack].sections.length;loadSection(currentSection);}}schedulerTimer=setTimeout(scheduler,25);}
+function scheduler(){const tr=TRACKS[currentTrack],STEP=60/tr.bpm/4;while(nextNoteTime<audioCtx.currentTime+.1){const t=nextNoteTime,step=drumIdx%16;if(melIdx<melSteps.length){playNote(melSteps[melIdx].freq,t,STEP*.85,tr.type,.08);melIdx++;}if(bassIdx<bassSteps.length){playNote(bassSteps[bassIdx].freq,t,STEP*.7,tr.type,.065);bassIdx++;}playNote(arpSteps[arpIdx%arpSteps.length].freq,t,STEP*.5,tr.arpType,.035);arpIdx++;if(step===0||step===8)playDrum(t,true);if(step===4||step===12)playDrum(t,false);drumIdx++;nextNoteTime+=STEP;if(melIdx>=melSteps.length){currentSection=(currentSection+1)%TRACKS[currentTrack].sections.length;loadSection(currentSection);}}schedulerTimer=setTimeout(scheduler,25);}
 function startMusic(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();currentSection=0;loadSection(0);nextNoteTime=audioCtx.currentTime+.05;scheduler();musicPlaying=true;}
 function stopMusic(){clearTimeout(schedulerTimer);musicPlaying=false;}
 function toggleMusic(){
@@ -555,50 +630,6 @@ document.addEventListener('click',e=>{if(!document.getElementById('music-wrap').
 function dismissWelcome(){const w=document.getElementById('welcome');w.classList.add('hiding');setTimeout(()=>w.remove(),380);}
 setTimeout(()=>{const w=document.getElementById('welcome');if(w)dismissWelcome();},9000);
 
-// ── Persistence ────────────────────────────────────────────────────────────
-const SAVE_KEY='zen-garden-session';
-
-async function autoSave(){
-  try{
-    const data={
-      grid:grid.map(row=>row.map(c=>({...c}))),
-      time:timeOfDay,
-      beeSpawned,
-      butterflyCount:butterflies.length,
-      birdCount:birds.length,
-    };
-    await window.storage.set(SAVE_KEY,JSON.stringify(data));
-  }catch(e){console.warn('zen-garden save failed:',e);}
-}
-
-// force a synchronous-style save right before the tab unloads
-window.addEventListener('beforeunload',()=>{ autoSave(); });
-
-async function tryRestoreSession(){
-  try{
-    const result=await window.storage.get(SAVE_KEY);
-    if(!result||!result.value)return false;
-    const data=JSON.parse(result.value);
-    if(!data.grid)return false;
-    grid=data.grid;
-    // patch any missing fields from old saves
-    for(let r=0;r<grid.length;r++)for(let c=0;c<grid[r].length;c++){
-      if(!grid[r][c])grid[r][c]={type:'mowed'};
-    }
-    recomputePondEdges();
-    if(data.time!=null){timeOfDay=data.time;document.getElementById('time-slider').value=timeOfDay;}
-    beeSpawned=!!data.beeSpawned;
-    butterflies=[];birds=[];bees=[];
-    const bc=data.butterflyCount||0,brd=data.birdCount||0;
-    for(let i=0;i<bc;i++)addButterfly(40+Math.random()*(W-80),40+Math.random()*(H-80));
-    for(let i=0;i<brd;i++)addBird(Math.random()*W,20+Math.random()*(H*.3));
-    if(beeSpawned)addBee(40+Math.random()*(W-80),30+Math.random()*(H*.4));
-    drawAll();drawDayNightOverlay();
-    document.getElementById('status').textContent='🌿 Welcome back to your garden!';
-    return true;
-  }catch(e){return false;}
-}
-
 // Boot
 calcDimensions();
 initGrid();
@@ -610,6 +641,9 @@ tryRestoreSession().then(restored=>{
     document.getElementById('welcome-body').innerHTML='your garden has been <span>waiting for you</span> ✿<br>keep growing something<br>beautiful 🌸';
     document.getElementById('welcome-close').textContent='back to the garden ✿';
   }
+  toggleDayNight();
+  const startMusicOnce=()=>{startMusic();const btn=document.getElementById('music-btn');btn.classList.add('active');const label=document.querySelector(`.track-opt[data-track="${currentTrack}"]`).textContent;btn.textContent=`🔊 ${label}`;musicPlaying=true;document.removeEventListener('pointerdown',startMusicOnce);};
+  document.addEventListener('pointerdown',startMusicOnce);
 });
 </script>
 </body>
