@@ -634,6 +634,14 @@ setTimeout(()=>{const w=document.getElementById('welcome');if(w)dismissWelcome()
 calcDimensions();
 initGrid();
 animLoop();sparkleLoop();windEffect();
+
+// start cycle immediately — before anything async
+isNightAuto=true;
+const dayBtn=document.getElementById('day-btn');
+dayBtn.classList.add('active');
+dayBtn.textContent='⏹ STOP';
+nightAutoTimer=setInterval(()=>{timeOfDay=(timeOfDay+0.04)%100;document.getElementById('time-slider').value=timeOfDay;drawDayNightOverlay();},60);
+
 tryRestoreSession().then(restored=>{
   if(!restored){drawAll();drawDayNightOverlay();}
   else{
