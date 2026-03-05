@@ -111,8 +111,8 @@ canvas{display:block;image-rendering:pixelated;}
 <div id="bee-toast"><p>🐝 a wild bee appeared!<br>drawn by your flowers ✿</p></div>
 
 <div id="welcome">
-  <p>🪴 welcome to<br><span>zen garden</span> 🪴</p>
-  <p>click &amp; drag to <span>mow</span> the grass,<br>or hit <span>🎲 random</span> to<br>explore a garden instantly.</p>
+  <p id="welcome-title">🪴 welcome to<br><span>zen garden</span> 🪴</p>
+  <p id="welcome-body">click &amp; drag to <span>mow</span> the grass,<br>or hit <span>🎲 random</span> to<br>explore a garden instantly.</p>
   <button id="welcome-close" onclick="dismissWelcome()">let's grow ✿</button>
 </div>
 
@@ -600,6 +600,11 @@ initGrid();
 animLoop();sparkleLoop();windEffect();
 tryRestoreSession().then(restored=>{
   if(!restored){drawAll();drawDayNightOverlay();}
+  else{
+    document.getElementById('welcome-title').innerHTML='🪴 welcome back!';
+    document.getElementById('welcome-body').innerHTML='your garden has been <span>waiting for you</span> ✿<br>keep growing something<br>beautiful 🌸';
+    document.getElementById('welcome-close').textContent='back to the garden ✿';
+  }
 });
 </script>
 </body>
