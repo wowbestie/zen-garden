@@ -69,7 +69,7 @@ canvas{display:block;image-rendering:pixelated;}
       <div class="track-opt" data-track="1" onclick="selectTrack(1)">🌸 Sakura Waltz</div>
     </div>
   </div>
-  <button class="hdr-btn" id="day-btn" onclick="toggleDayNight()">🌙 CYCLE</button>
+  <button class="hdr-btn active" id="day-btn" onclick="toggleDayNight()">⏹ STOP</button>
 </div>
 
 <div id="time-bar">
@@ -244,27 +244,7 @@ function addBee(x,y){
 }
 function addFox(){
   const left=Math.random()<.5;
-  foxes.push({
-    x:left?-50:W+50,
-    y:H*.72,
-    tx:40+Math.random()*(W-80),
-    ty:H*.65+Math.random()*H*.18,
-    dir:left?1:-1,
-    // leap state
-    leaping:false,
-    leapT:0,        // 0→1 progress through current leap
-    leapSpeed:0.07, // how fast leapT advances per frame
-    leapFromX:0, leapFromY:0,
-    leapToX:0,   leapToY:0,
-    leapHeight:22,  // peak arc height in px
-    // hop anim phase (advances each leap)
-    hopPhase:0,
-    // wander
-    wanderTimer:0,
-    wanderMax:60+Math.floor(Math.random()*100),
-    restTimer:0,
-    restMax:0,      // frames to rest between leaps
-  });
+  foxes.push({x:left?-50:W+50,y:H*.72,tx:40+Math.random()*(W-80),ty:H*.65+Math.random()*H*.18,dir:left?1:-1,leaping:false,leapT:0,leapSpeed:0.07,leapFromX:0,leapFromY:0,leapToX:0,leapToY:0,leapHeight:22,hopPhase:0,wanderTimer:0,wanderMax:60+Math.floor(Math.random()*100),restTimer:0,restMax:0});
 }
 function randomFlowerPos(){
   const fl=[];
@@ -272,67 +252,26 @@ function randomFlowerPos(){
   return fl.length?fl[Math.floor(Math.random()*fl.length)]:null;
 }
 
-// ── 8-bit pixel sprite helpers ─────────────────────────────────────────────
-function drawOwlPixel(ctx, cx, cy, wingPhase, blink){
-  const S=3;
-  const p=(dx,dy,c)=>{ctx.fillStyle=c;ctx.fillRect(~~(cx+dx*S),~~(cy+dy*S),S,S);};
-  const BR='#7a5230',DK='#3d2010',YE='#f5c018',TN='#c8a870',WG='#5a3d1a',OR='#c88018';
-  const up=Math.sin(wingPhase)>0;
-  const wy=up?-1:0;
-  // wings (behind body)
-  [[-4,0],[-3,0],[-4,1],[-3,1],[-2,1]].forEach(([dx,dy])=>p(dx,dy+wy,WG));
-  [[3,0],[4,0],[2,1],[3,1],[4,1]].forEach(([dx,dy])=>p(dx,dy+wy,WG));
-  // ear tufts
-  p(-1,-5,DK);p(0,-5,DK);
-  // head row
-  for(let dx=-2;dx<=2;dx++)p(dx,-4,BR);
-  // eyes + beak row
-  p(-2,-3,BR);p(-1,-3,blink?DK:YE);p(0,-3,OR);p(1,-3,blink?DK:YE);p(2,-3,BR);
-  // face row
-  for(let dx=-2;dx<=2;dx++)p(dx,-2,dx===0?OR:dx===1||dx===-1?TN:BR);
-  // body
-  for(let dy=-1;dy<=1;dy++)for(let dx=-2;dx<=2;dx++)p(dx,dy,dy===1||Math.abs(dx)===2?BR:TN);
-  // feet
-  p(-1,2,OR);p(1,2,OR);
-}
-
-function drawFoxPixel(ctx, cx, cy, dir, hopPhase){
+function drawFoxPixel(ctx,cx,cy,dir,hopPhase){
   const S=2;
-  // dir 1=right -1=left; flip dx
   const p=(dx,dy,c)=>{ctx.fillStyle=c;ctx.fillRect(~~(cx+(dir>0?dx:-dx)*S),~~(cy+dy*S),S,S);};
   const F='#d85c18',L='#e8a878',W='#f0efe0',PK='#e07080',K='#111111',Y='#e8c020';
-  // white tail tip
   p(-7,0,W);p(-8,0,W);p(-7,1,W);
-  // tail body
-  p(-6,-1,F);p(-5,-1,F);p(-4,-1,F);
-  p(-6,0,F);p(-5,0,F);p(-4,0,F);p(-3,0,F);
-  p(-5,1,F);p(-6,1,F);
-  // body
+  p(-6,-1,F);p(-5,-1,F);p(-4,-1,F);p(-6,0,F);p(-5,0,F);p(-4,0,F);p(-3,0,F);p(-5,1,F);p(-6,1,F);
   for(let dx=-2;dx<=2;dx++)p(dx,0,F);
   for(let dx=-2;dx<=2;dx++)p(dx,1,Math.abs(dx)<=1?L:F);
   for(let dx=-2;dx<=2;dx++)p(dx,2,Math.abs(dx)<=1?L:F);
-  // legs (3 visible, alternating)
   const la=Math.sin(hopPhase)>0;
   [[-2,la],[0,!la],[2,la]].forEach(([lx,dn])=>{p(lx,3,F);p(lx,4,dn?L:F);});
-  // neck
   p(3,0,F);p(3,1,F);p(3,2,F);
-  // head
   for(let dx=3;dx<=5;dx++){p(dx,-2,F);p(dx,-1,F);}
-  // ear + inner ear
-  p(4,-3,F);p(5,-3,F);p(5,-4,PK);
-  // eye
-  p(4,-1,Y);
-  // snout
-  p(5,0,L);p(6,0,L);p(6,1,L);
-  // nose (overlays snout tip)
-  p(6,0,K);
+  p(4,-3,F);p(5,-3,F);p(5,-4,PK);p(4,-1,Y);p(5,0,L);p(6,0,L);p(6,1,L);p(6,0,K);
 }
 
 let pondWaveT=0;
 function animLoop(){
   actx.clearRect(0,0,W,H);
   pondWaveT+=0.025;
-  // pond waves
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
     if(grid[r][c].type!=='pond')continue;
     const cell=grid[r][c],x=c*CELL,y=r*CELL;
@@ -344,7 +283,6 @@ function animLoop(){
     actx.fillStyle=`rgba(120,200,255,${0.10+0.07*wave})`;actx.fillRect(x+il,y+it+3+Math.floor(wave*1.5),ww,2);
     actx.fillStyle=`rgba(60,140,255,${0.07+0.05*wave2})`;actx.fillRect(x+il+2,y+it+8+Math.floor(wave2*1.5),ww-4,2);
   }
-  // butterflies
   butterflies.forEach(b=>{
     b.wingPhase+=b.wingSpeed;b.wanderTimer++;
     if(b.wanderTimer>b.wanderMax){b.tx=50+Math.random()*(W-100);b.ty=50+Math.random()*(H-100);b.wanderTimer=0;b.wanderMax=120+Math.floor(Math.random()*120);}
@@ -359,7 +297,6 @@ function animLoop(){
     actx.beginPath();actx.ellipse(b.x+wx*.35,b.y+1,wx*.4,b.size*.35,.3,0,Math.PI*2);actx.fill();
     actx.fillStyle='#222';actx.fillRect(b.x-1,b.y-b.size*.5,2,b.size);
   });
-  // birds
   birds.forEach(b=>{
     b.wingPhase+=b.wingSpeed;b.soarTimer++;
     if(b.soarTimer>b.soarMax){b.vy=(Math.random()-.5)*.4;b.soarTimer=0;b.soarMax=60+Math.floor(Math.random()*80);}
@@ -373,7 +310,6 @@ function animLoop(){
     actx.beginPath();actx.moveTo(b.x,b.y);actx.quadraticCurveTo(b.x+s*1.2,b.y-flap*s*.9,b.x+s*2.2,b.y+flap*s*.3);actx.stroke();
     actx.fillStyle='#445566';actx.beginPath();actx.ellipse(b.x,b.y,s*.6,s*.3,0,0,Math.PI*2);actx.fill();
   });
-  // bees
   bees.forEach(b=>{
     b.wingPhase+=b.wingSpeed;b.bobPhase+=0.055;b.wanderTimer++;
     if(b.wanderTimer>b.wanderMax){const fp=randomFlowerPos();if(fp&&Math.random()<0.72){b.tx=fp.x+(Math.random()-.5)*20;b.ty=fp.y+(Math.random()-.5)*20;}else{b.tx=40+Math.random()*(W-80);b.ty=30+Math.random()*(H*.75);}b.wanderTimer=0;b.wanderMax=80+Math.floor(Math.random()*80);}
@@ -404,65 +340,39 @@ function animLoop(){
     actx.beginPath();actx.arc(b.x+s*.45,b.y-s*2.0,s*.18,0,Math.PI*2);actx.fill();
   });
 
-  // ── night creatures ────────────────────────────────────────────────────
   const nd=getNightDepth();
   const isNight=nd>0;
-  if(isNight&&nd>.28){
-    if(foxes.length===0&&Math.random()<.002)addFox();
-  }
+  if(isNight&&nd>.28){if(foxes.length===0&&Math.random()<.002)addFox();}
   if(!isNight){owls=[];foxes=[];}
 
   const nightAlpha=Math.min(1,nd*4);
   actx.globalAlpha=nightAlpha;
-
-  // ── fox (8-bit leap movement) ──
   foxes.forEach(f=>{
     f.wanderTimer++;
-    if(f.wanderTimer>f.wanderMax){
-      f.tx=40+Math.random()*(W-80);
-      f.ty=H*.60+Math.random()*H*.22;
-      f.wanderTimer=0;
-      f.wanderMax=60+Math.floor(Math.random()*100);
-    }
-
+    if(f.wanderTimer>f.wanderMax){f.tx=40+Math.random()*(W-80);f.ty=H*.60+Math.random()*H*.22;f.wanderTimer=0;f.wanderMax=60+Math.floor(Math.random()*100);}
     const atTarget=Math.abs(f.tx-f.x)<8&&Math.abs(f.ty-f.y)<8;
-
     if(f.leaping){
-      // advance leap
       f.leapT=Math.min(1,f.leapT+f.leapSpeed);
-      // integer-snap x/y position along the arc
       f.x=Math.round(f.leapFromX+(f.leapToX-f.leapFromX)*f.leapT);
       f.y=Math.round(f.leapFromY+(f.leapToY-f.leapFromY)*f.leapT);
-      // parabolic arc — highest at t=0.5
       const arc=Math.sin(f.leapT*Math.PI)*f.leapHeight;
-      // hop phase advances through the leap for leg animation
       f.hopPhase=f.leapT*Math.PI;
-
-      if(f.leapT>=1){
-        f.leaping=false;
-        f.restTimer=0;
-        f.restMax=10+Math.floor(Math.random()*25); // short pause after landing
-      }
+      if(f.leapT>=1){f.leaping=false;f.restTimer=0;f.restMax=10+Math.floor(Math.random()*25);}
       drawFoxPixel(actx,f.x,f.y-arc,f.dir,f.hopPhase);
-    } else {
-      // resting between leaps
+    }else{
       f.restTimer++;
       if(f.restTimer>f.restMax&&!atTarget){
-        // kick off next leap toward target (or a step toward it)
-        const dx=f.tx-f.x, dy=f.ty-f.y;
-        const dist=Math.sqrt(dx*dx+dy*dy);
-        const stepDist=Math.min(dist,28+Math.random()*20); // leap size in px
-        f.leapFromX=f.x; f.leapFromY=f.y;
+        const dx=f.tx-f.x,dy=f.ty-f.y,dist=Math.sqrt(dx*dx+dy*dy);
+        const stepDist=Math.min(dist,28+Math.random()*20);
+        f.leapFromX=f.x;f.leapFromY=f.y;
         f.leapToX=Math.round(Math.max(20,Math.min(W-20,f.x+(dx/dist)*stepDist)));
         f.leapToY=Math.round(Math.max(H*.55,Math.min(H*.88,f.y+(dy/dist)*stepDist)));
         if(Math.abs(dx)>4)f.dir=dx>0?1:-1;
-        f.leapT=0;
-        f.leaping=true;
+        f.leapT=0;f.leaping=true;
       }
       drawFoxPixel(actx,f.x,f.y,f.dir,0);
     }
   });
-
   actx.globalAlpha=1;
   requestAnimationFrame(animLoop);
 }
@@ -488,11 +398,24 @@ function drawDayNightOverlay(){
   document.getElementById('time-label').textContent=labels[Math.min(Math.round(timeOfDay/25),4)];
 }
 function setTimeOfDay(v){timeOfDay=parseFloat(v);document.getElementById('time-slider').value=v;drawDayNightOverlay();debouncedSave();}
-function toggleDayNight(){
+
+function startCycle(){
+  if(nightAutoTimer)clearInterval(nightAutoTimer);
+  isNightAuto=true;
   const btn=document.getElementById('day-btn');
-  if(!isNightAuto){isNightAuto=true;btn.classList.add('active');btn.textContent='⏹ STOP';nightAutoTimer=setInterval(()=>{timeOfDay=(timeOfDay+0.04)%100;document.getElementById('time-slider').value=timeOfDay;drawDayNightOverlay();},60);}
-  else{isNightAuto=false;btn.classList.remove('active');btn.textContent='🌙 CYCLE';clearInterval(nightAutoTimer);}
+  btn.classList.add('active');
+  btn.textContent='⏹ STOP';
+  nightAutoTimer=setInterval(()=>{timeOfDay=(timeOfDay+0.04)%100;document.getElementById('time-slider').value=timeOfDay;drawDayNightOverlay();},60);
 }
+function stopCycle(){
+  clearInterval(nightAutoTimer);
+  nightAutoTimer=null;
+  isNightAuto=false;
+  const btn=document.getElementById('day-btn');
+  btn.classList.remove('active');
+  btn.textContent='🌙 CYCLE';
+}
+function toggleDayNight(){isNightAuto?stopCycle():startCycle();}
 
 function spawnSparkles(x,y,color,n){for(let i=0;i<n;i++)sparkles.push({x,y,vx:(Math.random()-.5)*4,vy:(Math.random()-.5)*4-1,life:1,color,size:2+Math.random()*3});}
 function sparkleLoop(){
@@ -630,17 +553,15 @@ document.addEventListener('click',e=>{if(!document.getElementById('music-wrap').
 function dismissWelcome(){const w=document.getElementById('welcome');w.classList.add('hiding');setTimeout(()=>w.remove(),380);}
 setTimeout(()=>{const w=document.getElementById('welcome');if(w)dismissWelcome();},9000);
 
-// Boot
+// ── Boot ───────────────────────────────────────────────────────────────────
 calcDimensions();
 initGrid();
-animLoop();sparkleLoop();windEffect();
+animLoop();
+sparkleLoop();
+windEffect();
 
-// start cycle immediately — before anything async
-isNightAuto=true;
-const dayBtn=document.getElementById('day-btn');
-dayBtn.classList.add('active');
-dayBtn.textContent='⏹ STOP';
-nightAutoTimer=setInterval(()=>{timeOfDay=(timeOfDay+0.04)%100;document.getElementById('time-slider').value=timeOfDay;drawDayNightOverlay();},60);
+// Start the day/night cycle immediately on load (single source of truth)
+startCycle();
 
 tryRestoreSession().then(restored=>{
   if(!restored){drawAll();drawDayNightOverlay();}
@@ -649,12 +570,6 @@ tryRestoreSession().then(restored=>{
     document.getElementById('welcome-body').innerHTML='your garden has been <span>waiting for you</span> ✿<br>keep growing something<br>beautiful 🌸';
     document.getElementById('welcome-close').textContent='back to the garden ✿';
   }
-  // start cycle by default
-  isNightAuto=true;
-  const dayBtn=document.getElementById('day-btn');
-  dayBtn.classList.add('active');
-  dayBtn.textContent='⏹ STOP';
-  nightAutoTimer=setInterval(()=>{timeOfDay=(timeOfDay+0.04)%100;document.getElementById('time-slider').value=timeOfDay;drawDayNightOverlay();},60);
   const startMusicOnce=()=>{startMusic();const btn=document.getElementById('music-btn');btn.classList.add('active');const label=document.querySelector(`.track-opt[data-track="${currentTrack}"]`).textContent;btn.textContent=`🔊 ${label}`;musicPlaying=true;document.removeEventListener('pointerdown',startMusicOnce);};
   document.addEventListener('pointerdown',startMusicOnce);
 });
